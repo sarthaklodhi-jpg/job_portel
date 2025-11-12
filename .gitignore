@@ -1,0 +1,17 @@
+# Ignore backend & frontend dependencies
+backend/node_modules/
+frontend/node_modules/
+
+# Ignore lock files (optional)
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+
+# Ignore local env files
+.env
+backend/.env
+frontend/.env
+
+# Build folders
+dist/
+.vscode/
