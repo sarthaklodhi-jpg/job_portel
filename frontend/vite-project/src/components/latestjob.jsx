@@ -1,5 +1,5 @@
 import React from "react";
-import LatestJobCards from "./LatestJobCards";
+import LatestJobCards from "./latestjobcards";
 import { useSelector } from "react-redux";
 import useGetAllJobs from "../hook/usegetalljobs.jsx";
 import { motion } from "framer-motion";
