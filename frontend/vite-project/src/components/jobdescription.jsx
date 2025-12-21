@@ -11,7 +11,7 @@ import {
 } from "../utils/constant.js";
 import { toast } from "react-hot-toast";
 import { motion } from "framer-motion";
-import CompanyAvatar from "./shared/CompanyAvatar";
+import CompanyAvatar from "./shared/companyavatar";
 
 const JobDescription = () => {
   const dispatch = useDispatch();
