@@ -16,6 +16,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { USER_API_END_POINT } from "../utils/constant.js";
 import { toast } from "sonner";
 import { setUser } from "../redux/authslice";
+import { motion } from "framer-motion";
 
 const UpdateProfileDialog = ({ open, setOpen }) => {
   const [localLoading, setLocalLoading] = useState(false);
@@ -73,7 +74,6 @@ const UpdateProfileDialog = ({ open, setOpen }) => {
         toast.error(res.data.message || "Failed to update profile.");
       }
     } catch (error) {
-      console.error("Error updating profile:", error);
       toast.error("Something went wrong while updating profile.");
     } finally {
       setLocalLoading(false);
@@ -83,102 +83,81 @@ const UpdateProfileDialog = ({ open, setOpen }) => {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent
-        className="sm:max-w-[425px]"
+        className="sm:max-w-[480px] rounded-2xl p-0 overflow-hidden"
         onInteractOutside={() => setOpen(false)}
       >
-        <DialogHeader>
-          <DialogTitle>Update Profile</DialogTitle>
-          <DialogDescription>
-            Update your personal information and upload your resume.
-          </DialogDescription>
-        </DialogHeader>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.96 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.25, ease: "easeOut" }}
+        >
+          {/* Header */}
+          <DialogHeader className="px-6 pt-6 pb-4 border-b">
+            <DialogTitle className="text-xl font-bold">
+              Update Profile
+            </DialogTitle>
+            <DialogDescription className="text-gray-500">
+              Keep your information up to date for better opportunities.
+            </DialogDescription>
+          </DialogHeader>
 
-        <form onSubmit={submitHandler}>
-          <div className="grid gap-4 py-4">
-            {/* Full Name */}
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="fullname" className="text-right">
-                Name
-              </Label>
-              <Input
-                id="fullname"
-                name="fullname"
-                type="text"
-                value={input.fullname}
-                onChange={changeEventHandler}
-                className="col-span-3"
-                placeholder="Enter your full name"
-              />
-            </div>
+          {/* Form */}
+          <form onSubmit={submitHandler} className="px-6 py-5 space-y-4">
+            {/* Name */}
+            <FormRow
+              label="Name"
+              id="fullname"
+              name="fullname"
+              value={input.fullname}
+              onChange={changeEventHandler}
+              placeholder="Enter your full name"
+            />
 
             {/* Email */}
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="email" className="text-right">
-                Email
-              </Label>
-              <Input
-                id="email"
-                name="email"
-                type="email"
-                value={input.email}
-                onChange={changeEventHandler}
-                className="col-span-3"
-                placeholder="Enter your email"
-              />
-            </div>
+            <FormRow
+              label="Email"
+              id="email"
+              name="email"
+              type="email"
+              value={input.email}
+              onChange={changeEventHandler}
+              placeholder="Enter your email"
+            />
 
-            {/* Number */}
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="phoneNumber" className="text-right">
-                Number
-              </Label>
-              <Input
-                id="phoneNumber"
-                name="phoneNumber"
-                type="text"
-                value={input.phoneNumber}
-                onChange={changeEventHandler}
-                className="col-span-3"
-                placeholder="Enter your number"
-              />
-            </div>
+            {/* Phone */}
+            <FormRow
+              label="Phone"
+              id="phoneNumber"
+              name="phoneNumber"
+              value={input.phoneNumber}
+              onChange={changeEventHandler}
+              placeholder="Enter your number"
+            />
 
             {/* Bio */}
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="bio" className="text-right">
-                Bio
-              </Label>
-              <Input
-                id="bio"
-                name="bio"
-                type="text"
-                value={input.bio}
-                onChange={changeEventHandler}
-                className="col-span-3"
-                placeholder="Enter a short bio"
-              />
-            </div>
+            <FormRow
+              label="Bio"
+              id="bio"
+              name="bio"
+              value={input.bio}
+              onChange={changeEventHandler}
+              placeholder="Short bio about you"
+            />
 
             {/* Skills */}
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="skills" className="text-right">
-                Skills
-              </Label>
-              <Input
-                id="skills"
-                name="skills"
-                type="text"
-                value={input.skills}
-                onChange={changeEventHandler}
-                className="col-span-3"
-                placeholder="e.g. HTML, CSS, React"
-              />
-            </div>
+            <FormRow
+              label="Skills"
+              id="skills"
+              name="skills"
+              value={input.skills}
+              onChange={changeEventHandler}
+              placeholder="HTML, CSS, React"
+            />
 
             {/* Resume */}
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="file" className="text-right">
-                Resume
+            <div className="space-y-1">
+              <Label htmlFor="file" className="font-medium">
+                Resume (PDF)
               </Label>
               <Input
                 id="file"
@@ -186,33 +165,58 @@ const UpdateProfileDialog = ({ open, setOpen }) => {
                 type="file"
                 accept="application/pdf"
                 onChange={fileChangeHandler}
-                className="col-span-3"
               />
             </div>
-          </div>
 
-          <DialogFooter>
-            {localLoading ? (
-              <Button
-                disabled
-                className="w-full my-4 flex items-center justify-center gap-2"
-              >
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Please wait...
-              </Button>
-            ) : (
-              <Button
-                type="submit"
-                className="w-full bg-[#F83802] hover:bg-[#d52e00] text-white font-semibold py-2 text-lg rounded-lg"
-              >
-                Update
-              </Button>
-            )}
-          </DialogFooter>
-        </form>
+            {/* Footer */}
+            <DialogFooter className="pt-4">
+              {localLoading ? (
+                <Button
+                  disabled
+                  className="w-full flex items-center justify-center gap-2"
+                >
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Updating...
+                </Button>
+              ) : (
+                <Button
+                  type="submit"
+                  className="w-full bg-[#F83802] hover:bg-[#d52e00] 
+                             text-white font-semibold py-2.5 rounded-xl"
+                >
+                  Save Changes
+                </Button>
+              )}
+            </DialogFooter>
+          </form>
+        </motion.div>
       </DialogContent>
     </Dialog>
   );
 };
+
+const FormRow = ({
+  label,
+  id,
+  name,
+  value,
+  onChange,
+  placeholder,
+  type = "text",
+}) => (
+  <div className="space-y-1">
+    <Label htmlFor={id} className="font-medium">
+      {label}
+    </Label>
+    <Input
+      id={id}
+      name={name}
+      type={type}
+      value={value}
+      onChange={onChange}
+      placeholder={placeholder}
+    />
+  </div>
+);
 
 export default UpdateProfileDialog;

@@ -13,45 +13,47 @@ import  getDataUri  from "../utils/datauri.js";
 // 🧩 REGISTER CONTROLLER
 // ==========================================
 export const register = async (req, res) => {
- 
-
   try {
     const { fullname, email, phoneNumber, password, role } = req.body;
 
-
-
-  
-
-     const file = req.file;
-
-    // ✅ Upload file to Cloudinary (only if file exists)
-    let cloudResponse = null;
-    if (file) {
-     cloudResponse = await cloudinary.uploader.upload(req.file.path, {
-  resource_type: "auto",          // auto-detects PDFs as raw, but keeps them public
-  folder: "resumes",
-  access_mode: "public",          // <—— adds public access
-});
-}
-    // ✅ Validate all required fields
+    // ✅ Validate fields
     if (!fullname || !email || !phoneNumber || !password || !role) {
       return res.status(400).json({
         message: "All fields are required",
-        success: false
+        success: false,
       });
     }
 
-    // ✅ Check if user already exists
+    // ✅ Check existing user
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({
         message: "User already exists",
-        success: false
+        success: false,
       });
     }
 
     // ✅ Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
+
+    // ===============================
+    // ✅ PROFILE PHOTO UPLOAD (FIXED)
+    // ===============================
+    let profilePhoto = "";
+
+    if (req.file && req.file.buffer) {
+      const fileUri = getDataUri(req.file);
+
+      const cloudResponse = await cloudinary.uploader.upload(
+        fileUri.content,
+        {
+          folder: "profile_photos",
+          resource_type: "image",
+        }
+      );
+
+      profilePhoto = cloudResponse.secure_url;
+    }
 
     // ✅ Create user
     const newUser = await User.create({
@@ -60,9 +62,9 @@ export const register = async (req, res) => {
       phoneNumber,
       password: hashedPassword,
       role,
-      profile:{
-        profilePhoto: cloudResponse ? cloudResponse.secure_url : "",
-      }
+      profile: {
+        profilePhoto,
+      },
     });
 
     return res.status(201).json({
@@ -73,18 +75,19 @@ export const register = async (req, res) => {
         fullname: newUser.fullname,
         email: newUser.email,
         phoneNumber: newUser.phoneNumber,
-        role: newUser.role
-      }
+        role: newUser.role,
+        profile: newUser.profile,
+      },
     });
-
   } catch (error) {
     console.error("Registration error:", error);
     return res.status(500).json({
       message: "Server error",
-      success: false
+      success: false,
     });
   }
 };
+
 
 // ==========================================
 // 🧩 LOGIN CONTROLLER
@@ -192,19 +195,6 @@ export const updateProfile = async (req, res) => {
     const { fullname, email, phoneNumber, bio, skills } = req.body;
     const file = req.file;
 
-    // ✅ Upload file to Cloudinary (only if file exists)
-    let cloudResponse = null;
-    if (file) {
-      cloudResponse = await cloudinary.uploader.upload(req.file.path, {
-        resource_type: "raw",   // handles PDFs properly
-        folder: "resumes",      // folder name in Cloudinary
-        type: "upload",         // ensures it's an upload-type asset
-        access_mode: "public",  // makes it accessible via URL
-        flags: "attachment",    // optional: makes it download-friendly
-      });
-    }
-
-    // ✅ Get user ID from middleware
     const userId = req.id;
     if (!userId) {
       return res.status(401).json({
@@ -213,7 +203,6 @@ export const updateProfile = async (req, res) => {
       });
     }
 
-    // ✅ Find user
     let user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({
@@ -222,10 +211,10 @@ export const updateProfile = async (req, res) => {
       });
     }
 
-    // ✅ Ensure profile object exists
+    // Ensure profile object exists
     if (!user.profile) user.profile = {};
 
-    // ✅ Convert skills string → array
+    // ✅ Convert skills
     let skillsArray = [];
     if (skills) {
       try {
@@ -238,14 +227,31 @@ export const updateProfile = async (req, res) => {
       }
     }
 
-    // ✅ Update fields
+    // ✅ Update basic fields
     if (fullname) user.fullname = fullname.trim();
     if (email) user.email = email.trim().toLowerCase();
     if (phoneNumber) user.phoneNumber = phoneNumber.trim();
     if (bio) user.profile.bio = bio.trim();
     if (skillsArray.length > 0) user.profile.skills = skillsArray;
 
-    if (cloudResponse) {
+    // ===============================
+    // ✅ RESUME UPLOAD (FIXED)
+    // ===============================
+    if (file && file.buffer) {
+      const fileUri = getDataUri(file);
+
+    const cloudResponse = await cloudinary.uploader.upload(
+  fileUri.content,
+  {
+    resource_type: "raw",
+    folder: "resumes",
+    use_filename: true,
+    unique_filename: false,
+    flags: "attachment", // ⭐ THIS IS THE MAGIC
+  }
+);
+
+
       user.profile.resume = cloudResponse.secure_url;
       user.profile.resumeOriginalName = file.originalname;
     }

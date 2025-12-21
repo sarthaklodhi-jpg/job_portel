@@ -103,6 +103,8 @@ export const getApplicants = async (req, res) => {
       options: { sort: { createdAt: -1 } },
       populate: {
         path: "applicant",
+           model: "User", // IMPORTANT
+      select: "fullName email phone resume", // optimization
       },
     });
 

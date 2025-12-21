@@ -174,7 +174,9 @@ export const getAdminJobs = async (req, res) => {
     const adminId = req.id; // ID from auth middleware (logged-in admin)
 
     // Find all jobs created by this admin
-    const jobs = await Job.find({ created_by: adminId }).populate("company");
+    const jobs = await Job.find({ created_by: adminId }).populate({
+      path: "company"
+    });
 
     if (!jobs || jobs.length === 0) {
       return res.status(404).json({
@@ -197,3 +199,36 @@ export const getAdminJobs = async (req, res) => {
     });
   }
 };
+
+
+
+
+export const deleteJob = async (req, res) => {
+  try {
+    const jobId = req.params.id;
+
+    const job = await Job.findById(jobId);
+    if (!job) {
+      return res.status(404).json({
+        success: false,
+        message: "Job not found",
+      });
+    }
+
+    await Job.findByIdAndDelete(jobId);
+
+    return res.status(200).json({
+      success: true,
+      message: "Job deleted successfully",
+    });
+  } catch (error) {
+    console.error("Error deleting job:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
+};
+
+
+
