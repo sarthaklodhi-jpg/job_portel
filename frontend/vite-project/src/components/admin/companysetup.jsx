@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import Navbar from "../shared/Navbar";
+import Navbar from "../shared/navbar";
+
 import { Button } from "../ui/button";
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
