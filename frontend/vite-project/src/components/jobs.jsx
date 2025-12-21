@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import Navbar from "./shared/navbar.jsx";
+import Navbar from "./shared/navbar";
 import FilterCard from "./FilterCard";
 import Job from "./job.jsx";
 import { useSelector } from "react-redux";

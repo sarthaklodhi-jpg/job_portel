@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import Navbar from "../shared/navbar";
+import Navbar from "./shared/navbar";
 
 import { Avatar, AvatarImage } from "./ui/avatar";
 import { Button } from "./ui/button";

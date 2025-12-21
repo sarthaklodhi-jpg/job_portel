@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import Navbar from "../shared/navbar";
+import Navbar from "../components/shared/navbar";
 
 import Job from "./job";
 import { useSelector, useDispatch } from "react-redux";
