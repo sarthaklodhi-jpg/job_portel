@@ -1,6 +1,5 @@
 import express from "express";
 import cookieParser from "cookie-parser";
-import cors from "cors";
 import dotenv from "dotenv";
 
 import connectDB from "./utils/db.js";
@@ -25,26 +24,46 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-const corsOptions = {
-  origin: [
-    "http://localhost:5173",                 // local frontend
-    "https://job-portel-r6zd.vercel.app",    // Vercel frontend (IMPORTANT)
-  ],
-  credentials: true,
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
-};
+/* ===========================
+   🔐 MANUAL CORS (FINAL FIX)
+=========================== */
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://job-portel-r6zd.vercel.app",
+];
 
-app.use(cors(corsOptions));
-app.options("*", cors(corsOptions)); // 🔥 VERY IMPORTANT (preflight)
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+
+  if (allowedOrigins.includes(origin)) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+  }
+
+  res.setHeader("Access-Control-Allow-Credentials", "true");
+  res.setHeader(
+    "Access-Control-Allow-Methods",
+    "GET, POST, PUT, DELETE, OPTIONS"
+  );
+  res.setHeader(
+    "Access-Control-Allow-Headers",
+    "Content-Type, Authorization"
+  );
+
+  // Handle preflight requests
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(200);
+  }
+
+  next();
+});
 
 /* ===========================
    TEST ROUTE
 =========================== */
 app.get("/home", (req, res) => {
-  return res.status(200).json({
+  res.status(200).json({
     success: true,
-    message: "Hello from the backend!",
+    message: "Hello from backend 🚀",
   });
 });
 
