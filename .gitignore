@@ -18,3 +18,8 @@ dist/
 
 # uploads
 backend/uploads/
+
+# environment variables
+.env
+.env.local
+.env.production
