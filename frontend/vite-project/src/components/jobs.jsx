@@ -3,7 +3,7 @@ import Navbar from "./shared/navbar.jsx";
 import FilterCard from "./FilterCard";
 import Job from "./job.jsx";
 import { useSelector } from "react-redux";
-import useGetAllJobs from "../hook/useGetAllJobs.jsx";
+import useGetAllJobs from "../hook/usegetalljobs.jsx";
 import { motion, AnimatePresence } from "framer-motion";
 
 /* ================= ANIMATION VARIANTS ================= */
