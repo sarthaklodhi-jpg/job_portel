@@ -96,7 +96,6 @@ export const login = async (req, res) => {
   try {
     const { email, password, role } = req.body;
 
-    // ✅ Validate input fields
     if (!email || !password || !role) {
       return res.status(400).json({
         message: "All fields are required",
@@ -104,8 +103,7 @@ export const login = async (req, res) => {
       });
     }
 
-    // ✅ Check if user exists
-    let user = await User.findOne({ email });
+    const user = await User.findOne({ email });
     if (!user) {
       return res.status(400).json({
         message: "Incorrect email or password",
@@ -113,7 +111,6 @@ export const login = async (req, res) => {
       });
     }
 
-    // ✅ Compare password
     const isPasswordMatch = await bcrypt.compare(password, user.password);
     if (!isPasswordMatch) {
       return res.status(400).json({
@@ -122,7 +119,6 @@ export const login = async (req, res) => {
       });
     }
 
-    // ✅ Validate user role
     if (role !== user.role) {
       return res.status(400).json({
         message: "Account doesn't exist with current role",
@@ -130,13 +126,11 @@ export const login = async (req, res) => {
       });
     }
 
-    // ✅ Generate JWT token
-    const token = jwt.sign({ userId: user._id }, process.env.SECRET_KEY, {
-      expiresIn: "1d"
-    });
-
-    // ✅ Remove password before sending
-    user.password = undefined;
+    const token = jwt.sign(
+      { userId: user._id },
+      process.env.SECRET_KEY,
+      { expiresIn: "1d" }
+    );
 
     const userData = {
       _id: user._id,
@@ -147,14 +141,16 @@ export const login = async (req, res) => {
       profile: user.profile
     };
 
+    // ✅ CORRECT chaining
     return res
       .status(200)
-     res.cookie("token", token, {
-  httpOnly: true,
-  secure: true,        // REQUIRED for HTTPS
-  sameSite: "none",    // REQUIRED for cross-site
-  maxAge: 24 * 60 * 60 * 1000
-}).json({
+      .cookie("token", token, {
+        httpOnly: true,
+        secure: true,
+        sameSite: "none",
+        maxAge: 24 * 60 * 60 * 1000
+      })
+      .json({
         message: `Welcome back ${user.fullname}`,
         user: userData,
         success: true
