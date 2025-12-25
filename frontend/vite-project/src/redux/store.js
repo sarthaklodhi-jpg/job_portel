@@ -3,6 +3,7 @@ import authSlice from "./authslice";
 import jobSlice from "./jobslice";
 import companySlice from "./companyslice";
 import applicationsSlice from "./applicationsSlice";
+
 import {
   persistStore,
   persistReducer,
@@ -15,37 +16,64 @@ import {
 } from "redux-persist";
 import storage from "redux-persist/lib/storage";
 
-//we have use this type of redux so that we do nit have to login each time 
+/* =========================
+   PERSIST CONFIG
+========================= */
 
-// ✅ Persist configuration
+// ❗ DO NOT persist loading state
+const authPersistConfig = {
+  key: "auth",
+  storage,
+  blacklist: ["loading"],
+};
+
+/* =========================
+   ROOT REDUCER
+========================= */
+
+const rootReducer = combineReducers({
+  auth: persistReducer(authPersistConfig, authSlice),
+  job: jobSlice,
+  company: companySlice,
+  application: applicationsSlice,
+});
+
+/* =========================
+   PERSISTED REDUCER
+========================= */
+
 const persistConfig = {
   key: "root",
   version: 1,
   storage,
 };
 
-// ✅ Combine all reducers
-const rootReducer = combineReducers({
-  auth: authSlice,
-  job: jobSlice,
-  company : companySlice,
-  application : applicationsSlice,
-});
-
-// ✅ Apply persist reducer
 const persistedReducer = persistReducer(persistConfig, rootReducer);
 
-// ✅ Configure store
+/* =========================
+   STORE
+========================= */
+
 const store = configureStore({
   reducer: persistedReducer,
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: {
-        ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
+        ignoredActions: [
+          FLUSH,
+          REHYDRATE,
+          PAUSE,
+          PERSIST,
+          PURGE,
+          REGISTER,
+        ],
       },
     }),
 });
 
-// ✅ Create persistor (required for PersistGate)
+/* =========================
+   PERSISTOR
+========================= */
+
 export const persistor = persistStore(store);
 export default store;

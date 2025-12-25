@@ -92,6 +92,8 @@ export const register = async (req, res) => {
 // ==========================================
 // 🧩 LOGIN CONTROLLER
 // ==========================================
+
+const isProd = process.env.NODE_ENV === "production";
 export const login = async (req, res) => {
   try {
     const { email, password, role } = req.body;
@@ -150,10 +152,11 @@ export const login = async (req, res) => {
     return res
       .status(200)
       .cookie("token", token, {
-        maxAge: 1 * 24 * 60 * 60 * 1000,
-        httpOnly: true,
-        sameSite: "strict"
-      })
+  maxAge: 24 * 60 * 60 * 1000,
+  httpOnly: true,
+  sameSite: isProd ? "none" : "lax",
+  secure: isProd,
+})
       .json({
         message: `Welcome back ${user.fullname}`,
         user: userData,
