@@ -19,25 +19,20 @@ const app = express();
 connectDB();
 
 /* =========================
-   CORS — MUST BE FIRST
+   CORS (SAFE)
 ========================= */
 app.use(
   cors({
     origin: [
       "http://localhost:5173",
-      "https://job-portel-sage.vercel.app", // ✅ CORRECT DOMAIN
+      "https://job-portel-sage.vercel.app",
     ],
     credentials: true,
   })
 );
 
 /* =========================
-   PREFLIGHT (OPTIONS)
-========================= */
-
-
-/* =========================
-   BODY & COOKIE PARSERS
+   MIDDLEWARES
 ========================= */
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
