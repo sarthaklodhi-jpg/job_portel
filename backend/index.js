@@ -34,7 +34,7 @@ app.use(
 /* =========================
    PREFLIGHT (OPTIONS)
 ========================= */
-app.options("*", cors());
+
 
 /* =========================
    BODY & COOKIE PARSERS
