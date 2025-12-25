@@ -19,36 +19,29 @@ const app = express();
 connectDB();
 
 /* =========================
-   MIDDLEWARES
-========================= */
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser());
-
-/* =========================
-   CORS (FINAL & CORRECT)
+   CORS — MUST BE FIRST
 ========================= */
 app.use(
   cors({
     origin: [
       "http://localhost:5173",
-      "https://job-portel-r6zd.vercel.app",
+      "https://job-portel-sage.vercel.app", // ✅ CORRECT DOMAIN
     ],
     credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 
 /* =========================
-   TEST ROUTE
+   PREFLIGHT (OPTIONS)
 ========================= */
-app.get("/home", (req, res) => {
-  res.status(200).json({
-    success: true,
-    message: "Hello from backend",
-  });
-});
+app.options("*", cors());
+
+/* =========================
+   BODY & COOKIE PARSERS
+========================= */
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 /* =========================
    ROUTES
