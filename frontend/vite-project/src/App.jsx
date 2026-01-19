@@ -1,28 +1,35 @@
-import { RouterProvider, createBrowserRouter } from "react-router-dom"
-import { Button } from "./components/ui/button"
-import Navbar from "./components/shared/navbar.jsx"
-import Home from "./lib/home.jsx"
-import Jobs from "./components/jobs.jsx"
-import Login from "./components/auth/login.jsx"
-import Signup from "./components/auth/signup.jsx"
-import Browse from "./components/browse.jsx"
-import Profile from "./components/profile.jsx"
-import Jobdescription from "./components/jobdescription.jsx"
-import Companies from "./components/admin/companies.jsx";
-import CompanyCreate from "./components/admin/companycreate";
-import CompanySetup from "./components/admin/companysetup.jsx";
 import React from "react";
+import { RouterProvider, createBrowserRouter } from "react-router-dom";
+
+/* ===== Common Pages ===== */
+import Home from "./lib/home.jsx";
+import Jobs from "./components/jobs.jsx";
+import Login from "./components/auth/login.jsx";
+import Signup from "./components/auth/signup.jsx";
+import Browse from "./components/browse.jsx";
+import Profile from "./components/profile.jsx";
+import Jobdescription from "./components/jobdescription.jsx";
+import CompleteProfile from "./components/CompleteProfile.jsx";
+
+/* ===== Recruiter (Admin) Pages ===== */
+import Companies from "./components/admin/companies.jsx";
+import CompanyCreate from "./components/admin/companycreate.jsx";
+import CompanySetup from "./components/admin/companysetup.jsx";
 import AdminJobs from "./components/admin/adminjobs.jsx";
-import PostJobs from "./components/admin/postjobs"
-import Applicants from "./components/admin/applicants"
-import ProtectedRoute from "./components/admin/protectedroute"
+import PostJobs from "./components/admin/postjobs.jsx";
+import Applicants from "./components/admin/applicants.jsx";
+
+/* ===== Dashboards ===== */
+import StudentDashboard from "../src/components/studentdashboard.jsx";
+import RecruiterDashboard from "../src/components/recruiterdashboard.jsx";
 
 const appRouter = createBrowserRouter([
+  /* ===== PUBLIC ROUTES ===== */
   {
     path: "/",
     element: <Home />,
   },
-  {                       
+  {
     path: "/login",
     element: <Login />,
   },
@@ -31,67 +38,65 @@ const appRouter = createBrowserRouter([
     element: <Signup />,
   },
   {
+    path: "/complete-profile",
+    element: <CompleteProfile />,
+  },
+
+  /* ===== STUDENT ROUTES ===== */
+  {
+    path: "/student/dashboard",
+    element: <StudentDashboard />,
+  },
+  {
     path: "/jobs",
-    element: <Jobs/>,
-    
+    element: <Jobs />,
   },
   {
     path: "/description/:id",
-    element: <Jobdescription/>,
-    
+    element: <Jobdescription />,
   },
   {
     path: "/browse",
-    element: <Browse/>,
-    
+    element: <Browse />,
   },
-   {
-    path: "/profile",
-    element: <Profile/>,
-    
-  },
-    
   {
-  path: "/admin/companies",
-  element: <ProtectedRoute><Companies /></ProtectedRoute> ,
-},
-{
-  path: "/admin/companies/create",
-  element: <ProtectedRoute><CompanyCreate /></ProtectedRoute>  ,
-},
+    path: "/profile",
+    element: <Profile />,
+  },
 
-{
-  path: "/admin/companies/:id",
-  element: <ProtectedRoute><CompanySetup /></ProtectedRoute>  ,
-},
-
-
-{
-  path: "/admin/jobs",
-  element: <ProtectedRoute><AdminJobs/></ProtectedRoute> ,
-},
-
-{
-  path: "/admin/jobs/create",
-  element: <ProtectedRoute><PostJobs/></ProtectedRoute>  ,
-},
-
-{
-  path: "/admin/jobs/:id/applicants",
-  element: <ProtectedRoute><Applicants/></ProtectedRoute> ,
-},
-
- 
-    
-    
-])
+  /* ===== RECRUITER ROUTES ===== */
+  {
+    path: "/recruiter/dashboard",
+    element: <RecruiterDashboard />,
+  },
+  {
+    path: "/admin/companies",
+    element: <Companies />,
+  },
+  {
+    path: "/admin/companies/create",
+    element: <CompanyCreate />,
+  },
+  {
+    path: "/admin/companies/:id",
+    element: <CompanySetup />,
+  },
+  {
+    path: "/admin/jobs",
+    element: <AdminJobs />,
+  },
+  {
+    path: "/admin/jobs/create",
+    element: <PostJobs />,
+  },
+  {
+    path: "/admin/jobs/:id/applicants",
+    element: <Applicants />,
+  },
+]);
 
 function App() {
-  return (
-    <>
-      <RouterProvider router={appRouter} />
-    </>
-  )
+  return <RouterProvider router={appRouter} />;
 }
 
-export default App
+export default App;

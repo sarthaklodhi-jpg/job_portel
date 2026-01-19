@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import Navbar from "./shared/navbar";
-
 import { Avatar, AvatarImage } from "./ui/avatar";
 import { Button } from "./ui/button";
 import { Contact, Mail, Pen } from "lucide-react";
@@ -12,28 +11,20 @@ import { useSelector } from "react-redux";
 import useGetAppliedJobs from "../hook/usegetappliedjob.jsx";
 import { motion } from "framer-motion";
 
-const getDownloadUrl = (url) => {
-  if (!url) return "";
-
-  // insert fl_attachment after /upload/
-  return url.replace("/upload/", "/upload/fl_attachment/");
-};
-
 const Profile = () => {
   useGetAppliedJobs();
   const [open, setOpen] = useState(false);
   const { user } = useSelector((store) => store.auth);
-
-  const handleOpenChange = (isOpen) => {
-    setOpen(isOpen);
-  };
 
   const fullName = user?.fullname || "User";
   const email = user?.email || "NA";
   const phone = user?.phoneNumber || "NA";
   const bio = user?.profile?.bio || "No bio available.";
   const skills = user?.profile?.skills || [];
-  const resumeUrl = user?.profile?.resume || "";
+
+  // ✅ USE BACKEND-GENERATED DOWNLOAD URL
+  const resumeDownloadUrl = user?.profile?.resumeDownloadUrl || "";
+  const resumeName = user?.profile?.resumeOriginalName || "View Resume";
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -83,12 +74,12 @@ const Profile = () => {
         <div className="mt-8 grid sm:grid-cols-2 gap-4">
           <div className="flex items-center gap-3 text-gray-700 bg-gray-50 p-3 rounded-lg">
             <Mail className="w-5 h-5 text-gray-500" />
-            <span className="text-sm sm:text-base">{email}</span>
+            <span>{email}</span>
           </div>
 
           <div className="flex items-center gap-3 text-gray-700 bg-gray-50 p-3 rounded-lg">
             <Contact className="w-5 h-5 text-gray-500" />
-            <span className="text-sm sm:text-base">{phone}</span>
+            <span>{phone}</span>
           </div>
         </div>
 
@@ -97,8 +88,7 @@ const Profile = () => {
 
         {/* Skills */}
         <div className="mb-8">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
-            <span className="w-1.5 h-6 bg-blue-600 rounded-full"></span>
+          <h2 className="text-xl font-semibold text-gray-800 mb-4">
             Skills
           </h2>
 
@@ -108,16 +98,13 @@ const Profile = () => {
                 <Badge
                   key={index}
                   variant="secondary"
-                  className="px-4 py-2 rounded-xl text-sm font-semibold 
-                             text-blue-700 bg-gradient-to-r from-blue-50 to-blue-100 
-                             border border-blue-200 shadow-sm 
-                             hover:shadow-md hover:scale-105 transition"
+                  className="px-4 py-2 rounded-xl text-sm font-semibold"
                 >
                   {skill}
                 </Badge>
               ))
             ) : (
-              <span className="text-gray-400 text-sm italic">
+              <span className="text-gray-400 italic">
                 No skills added yet
               </span>
             )}
@@ -130,26 +117,24 @@ const Profile = () => {
             Resume
           </Label>
 
-          {resumeUrl ? (
-            <div className="flex flex-wrap items-center gap-3">
+          {resumeDownloadUrl ? (
+            <div className="flex items-center gap-3">
               <a
-                href={resumeUrl}
+                href={resumeDownloadUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-blue-600 hover:text-blue-800 underline text-sm sm:text-base"
+                className="text-blue-600 underline"
               >
-                {user?.profile?.resumeOriginalName || "View Resume"}
+                {resumeName}
               </a>
 
-             <Button
-  size="sm"
-  variant="outline"
-  onClick={() => window.open(getDownloadUrl(resumeUrl), "_blank")}
->
-  Download
-</Button>
-
-
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => window.open(resumeDownloadUrl, "_blank")}
+              >
+                Download
+              </Button>
             </div>
           ) : (
             <span className="text-gray-400 text-sm">
@@ -174,11 +159,7 @@ const Profile = () => {
       </motion.div>
 
       {/* Update Profile Dialog */}
-      <UpdateProfileDialog
-        open={open}
-        setOpen={setOpen}
-        onOpenChange={handleOpenChange}
-      />
+      <UpdateProfileDialog open={open} setOpen={setOpen} />
     </div>
   );
 };

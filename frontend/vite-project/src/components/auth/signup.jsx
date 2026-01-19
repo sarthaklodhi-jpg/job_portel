@@ -12,6 +12,7 @@ import { setLoading } from "@/redux/authslice";
 import { useDispatch, useSelector } from "react-redux";
 import { Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
+import { GoogleLogin } from "@react-oauth/google";
 
 const Signup = () => {
   const [input, setInput] = useState({
@@ -204,6 +205,54 @@ const Signup = () => {
               Log In
             </a>
           </p>
+          {/* Divider */}
+<div className="my-6 flex items-center gap-3">
+  <div className="flex-1 h-px bg-gray-200" />
+  <span className="text-sm text-gray-400">OR</span>
+  <div className="flex-1 h-px bg-gray-200" />
+</div>
+
+{/* Google Signup */}
+<div className="flex justify-center">
+  <GoogleLogin
+    onSuccess={async (credentialResponse) => {
+    
+      console.log(
+      "GOOGLE CREDENTIAL:",
+      credentialResponse.credential
+    );
+
+
+      try {
+        dispatch(setLoading(true));
+
+        const res = await axios.post(
+          `${USER_API_END_POINT}/google`,
+          {
+            token: credentialResponse.credential,
+           
+          },
+          { withCredentials: true }
+        );
+
+       if (res.data.success) {
+  if (!res.data.isProfileComplete) {
+    navigate("/complete-profile");
+  } else {
+    navigate("/");
+  }
+}
+
+      } catch {
+        toast.error("Google signup failed");
+      } finally {
+        dispatch(setLoading(false));
+      }
+    }}
+    onError={() => toast.error("Google Signup Failed")}
+  />
+</div>
+
         </motion.form>
       </div>
     </div>

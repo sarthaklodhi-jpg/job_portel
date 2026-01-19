@@ -13,7 +13,7 @@ import { Button } from "./ui/button";
 import { Loader2 } from "lucide-react";
 import axios from "axios";
 import { useSelector, useDispatch } from "react-redux";
-import { USER_API_END_POINT } from "../utils/constant.js";
+import { USER_API_END_POINT } from "../utils/constant";
 import { toast } from "sonner";
 import { setUser } from "../redux/authslice";
 import { motion } from "framer-motion";
@@ -29,16 +29,20 @@ const UpdateProfileDialog = ({ open, setOpen }) => {
     phoneNumber: user?.phoneNumber || "",
     bio: user?.profile?.bio || "",
     skills: user?.profile?.skills?.join(", ") || "",
-    file: null,
+    profilePhoto: null,
+    resume: null,
   });
 
-  const changeEventHandler = (e) => {
+  const changeHandler = (e) => {
     setInput({ ...input, [e.target.name]: e.target.value });
   };
 
-  const fileChangeHandler = (e) => {
-    const file = e.target.files?.[0];
-    setInput({ ...input, file });
+  const profilePhotoHandler = (e) => {
+    setInput({ ...input, profilePhoto: e.target.files[0] });
+  };
+
+  const resumeHandler = (e) => {
+    setInput({ ...input, resume: e.target.files[0] });
   };
 
   const submitHandler = async (e) => {
@@ -55,26 +59,26 @@ const UpdateProfileDialog = ({ open, setOpen }) => {
         "skills",
         JSON.stringify(input.skills.split(",").map((s) => s.trim()))
       );
-      if (input.file) formData.append("file", input.file);
+
+      if (input.profilePhoto)
+        formData.append("profilePhoto", input.profilePhoto);
+
+      if (input.resume)
+        formData.append("resume", input.resume);
 
       const res = await axios.post(
         `${USER_API_END_POINT}/profile/update`,
         formData,
-        {
-          headers: { "Content-Type": "multipart/form-data" },
-          withCredentials: true,
-        }
+        { withCredentials: true }
       );
 
       if (res.data.success) {
         dispatch(setUser(res.data.user));
-        toast.success(res.data.message || "Profile updated successfully!");
+        toast.success("Profile updated successfully");
         setOpen(false);
-      } else {
-        toast.error(res.data.message || "Failed to update profile.");
       }
     } catch (error) {
-      toast.error("Something went wrong while updating profile.");
+      toast.error("Failed to update profile");
     } finally {
       setLocalLoading(false);
     }
@@ -82,111 +86,41 @@ const UpdateProfileDialog = ({ open, setOpen }) => {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent
-        className="sm:max-w-[480px] rounded-2xl p-0 overflow-hidden"
-        onInteractOutside={() => setOpen(false)}
-      >
+      <DialogContent className="sm:max-w-[480px] rounded-2xl p-0">
         <motion.div
-          initial={{ opacity: 0, scale: 0.96 }}
+          initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.25, ease: "easeOut" }}
         >
-          {/* Header */}
           <DialogHeader className="px-6 pt-6 pb-4 border-b">
-            <DialogTitle className="text-xl font-bold">
-              Update Profile
-            </DialogTitle>
-            <DialogDescription className="text-gray-500">
-              Keep your information up to date for better opportunities.
+            <DialogTitle>Update Profile</DialogTitle>
+            <DialogDescription>
+              Update your personal information
             </DialogDescription>
           </DialogHeader>
 
-          {/* Form */}
           <form onSubmit={submitHandler} className="px-6 py-5 space-y-4">
-            {/* Name */}
-            <FormRow
-              label="Name"
-              id="fullname"
-              name="fullname"
-              value={input.fullname}
-              onChange={changeEventHandler}
-              placeholder="Enter your full name"
-            />
-
-            {/* Email */}
-            <FormRow
-              label="Email"
-              id="email"
-              name="email"
-              type="email"
-              value={input.email}
-              onChange={changeEventHandler}
-              placeholder="Enter your email"
-            />
-
-            {/* Phone */}
-            <FormRow
-              label="Phone"
-              id="phoneNumber"
-              name="phoneNumber"
-              value={input.phoneNumber}
-              onChange={changeEventHandler}
-              placeholder="Enter your number"
-            />
-
-            {/* Bio */}
-            <FormRow
-              label="Bio"
-              id="bio"
-              name="bio"
-              value={input.bio}
-              onChange={changeEventHandler}
-              placeholder="Short bio about you"
-            />
-
-            {/* Skills */}
-            <FormRow
-              label="Skills"
-              id="skills"
-              name="skills"
-              value={input.skills}
-              onChange={changeEventHandler}
-              placeholder="HTML, CSS, React"
-            />
-
-            {/* Resume */}
-            <div className="space-y-1">
-              <Label htmlFor="file" className="font-medium">
-                Resume (PDF)
-              </Label>
-              <Input
-                id="file"
-                name="file"
-                type="file"
-                accept="application/pdf"
-                onChange={fileChangeHandler}
+            {/* Profile Photo */}
+            <div className="flex items-center gap-4">
+              <img
+                src={user?.profile?.profilePhoto || "/avatar.png"}
+                className="w-20 h-20 rounded-full object-cover border"
               />
+              <Input type="file" accept="image/*" onChange={profilePhotoHandler} />
             </div>
 
-            {/* Footer */}
-            <DialogFooter className="pt-4">
-              {localLoading ? (
-                <Button
-                  disabled
-                  className="w-full flex items-center justify-center gap-2"
-                >
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  Updating...
-                </Button>
-              ) : (
-                <Button
-                  type="submit"
-                  className="w-full bg-[#F83802] hover:bg-[#d52e00] 
-                             text-white font-semibold py-2.5 rounded-xl"
-                >
-                  Save Changes
-                </Button>
-              )}
+            <Input name="fullname" value={input.fullname} onChange={changeHandler} placeholder="Full name" />
+            <Input name="email" value={input.email} onChange={changeHandler} />
+            <Input name="phoneNumber" value={input.phoneNumber} onChange={changeHandler} />
+            <Input name="bio" value={input.bio} onChange={changeHandler} />
+            <Input name="skills" value={input.skills} onChange={changeHandler} placeholder="HTML, CSS, React" />
+
+            {/* Resume */}
+            <Input type="file" accept="application/pdf" onChange={resumeHandler} />
+
+            <DialogFooter>
+              <Button disabled={localLoading} className="w-full">
+                {localLoading ? <Loader2 className="animate-spin" /> : "Save Changes"}
+              </Button>
             </DialogFooter>
           </form>
         </motion.div>
@@ -194,29 +128,5 @@ const UpdateProfileDialog = ({ open, setOpen }) => {
     </Dialog>
   );
 };
-
-const FormRow = ({
-  label,
-  id,
-  name,
-  value,
-  onChange,
-  placeholder,
-  type = "text",
-}) => (
-  <div className="space-y-1">
-    <Label htmlFor={id} className="font-medium">
-      {label}
-    </Label>
-    <Input
-      id={id}
-      name={name}
-      type={type}
-      value={value}
-      onChange={onChange}
-      placeholder={placeholder}
-    />
-  </div>
-);
 
 export default UpdateProfileDialog;
