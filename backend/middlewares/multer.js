@@ -1,7 +1,17 @@
 import multer from "multer";
 
-// ✅ Use memory storage (REQUIRED for Cloudinary + DataURI)
+// ✅ Memory storage (Cloudinary + DataURI)
 const storage = multer.memoryStorage();
 
-// ✅ "file" must match frontend FormData key
+/* ================================
+   🔹 For COMPLETE PROFILE (single file)
+================================ */
 export const singleUpload = multer({ storage }).single("file");
+
+/* ================================
+   🔹 For PROFILE UPDATE (photo + resume)
+================================ */
+export const multiUpload = multer({ storage }).fields([
+  { name: "profilePhoto", maxCount: 1 },
+  { name: "resume", maxCount: 1 },
+]);

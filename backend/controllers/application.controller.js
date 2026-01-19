@@ -104,7 +104,7 @@ export const getApplicants = async (req, res) => {
       populate: {
         path: "applicant",
            model: "User", // IMPORTANT
-      select: "fullName email phone resume", // optimization
+     select: "fullname email phoneNumber profile.resume profile.resumeOriginalName", // optimization
       },
     });
 

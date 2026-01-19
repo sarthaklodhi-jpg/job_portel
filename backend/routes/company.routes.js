@@ -7,12 +7,23 @@ import {
   registerCompany,
   updateCompany,
 } from "../controllers/company.controller.js";
+
+// ✅ IMPORT CORRECT MULTER MIDDLEWARE
 import { singleUpload } from "../middlewares/multer.js";
 
 const router = express.Router();
 
-// ✅ Register new company (NOW SUPPORTS LOGO UPLOAD)
-router.post("/register", isAuthenticated, singleUpload, registerCompany);
+/* ================================
+   🏢 COMPANY ROUTES
+================================ */
+
+// ✅ Register new company (logo upload)
+router.post(
+  "/register",
+  isAuthenticated,
+  singleUpload,
+  registerCompany
+);
 
 // ✅ Get all companies for logged-in user
 router.get("/get", isAuthenticated, getCompany);
@@ -20,14 +31,19 @@ router.get("/get", isAuthenticated, getCompany);
 // ✅ Get company by ID
 router.get("/get/:id", isAuthenticated, getCompanyById);
 
-// ✅ Update company by ID (supports logo update)
-router.put("/update/:id", isAuthenticated, singleUpload, updateCompany);
+// ✅ Update company by ID (logo upload)
+router.put(
+  "/update/:id",
+  isAuthenticated,
+  singleUpload,
+  updateCompany
+);
 
+// ✅ Delete company
 router.delete(
   "/delete/:id",
   isAuthenticated,
   deleteCompany
 );
-
 
 export default router;
