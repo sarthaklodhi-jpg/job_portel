@@ -84,6 +84,13 @@ export const register = async (req, res) => {
 const isProd = process.env.NODE_ENV === "production";
 
 export const login = async (req, res) => {
+   console.log("🔥 LOGIN HIT");
+  console.log("ENV CHECK:", {
+    SECRET_KEY: !!process.env.SECRET_KEY,
+    NODE_ENV: process.env.NODE_ENV,
+    GOOGLE_CLIENT_ID: !!process.env.GOOGLE_CLIENT_ID,
+  });
+  
   try {
     const { email, password, role } = req.body;
 
