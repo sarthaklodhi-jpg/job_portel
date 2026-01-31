@@ -2,7 +2,8 @@ import { OAuth2Client } from "google-auth-library";
 import jwt from "jsonwebtoken";
 import { User } from "../models/user.model.js";
 
-const client = new OAuth2Client(); // 👈 no client ID here
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
 
 export const googleLogin = async (req, res) => {
   try {
@@ -44,13 +45,14 @@ export const googleLogin = async (req, res) => {
       { expiresIn: "1d" }
     );
 
-    return res
-      .cookie("token", jwtToken, {
-        httpOnly: true,
-        sameSite: "lax",
-        secure: false,
-        maxAge: 24 * 60 * 60 * 1000,
-      })
+  return res
+  .cookie("token", jwtToken, {
+    httpOnly: true,
+    secure: true,        // REQUIRED for HTTPS
+    sameSite: "none",    // REQUIRED for cross-domain
+    maxAge: 24 * 60 * 60 * 1000,
+  })
+
       .status(200)
       .json({
         success: true,
