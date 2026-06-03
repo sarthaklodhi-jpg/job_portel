@@ -9,10 +9,11 @@ import {
 import isAuthenticated from "../middlewares/isAuthenticated.js";
 import { singleUpload, multiUpload } from "../middlewares/multer.js";
 import { googleLogin } from "../controllers/google.authcontroller.js";
+import validateProfileUpdate from "../middlewares/validateProfileUpdate.js";
 
 const router = express.Router();
 
-router.post("/register", singleUpload, register);
+router.post("/register", multiUpload, register);
 router.post("/login", login);
 router.post("/google", googleLogin);
 router.get("/logout", logout);
@@ -22,6 +23,7 @@ router.post(
   "/profile/update",
   isAuthenticated,
   multiUpload,
+  validateProfileUpdate,
   updateProfile
 );
 
@@ -29,7 +31,7 @@ router.post(
 router.post(
   "/complete-profile",
   isAuthenticated,
-  singleUpload,
+  multiUpload,
   completeProfile
 );
 

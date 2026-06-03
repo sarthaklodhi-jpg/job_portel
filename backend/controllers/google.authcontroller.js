@@ -1,8 +1,10 @@
 import { OAuth2Client } from "google-auth-library";
 import jwt from "jsonwebtoken";
 import { User } from "../models/user.model.js";
+import { attachResumeDownloadUrl } from "../utils/resume.js";
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+const isProd = process.env.NODE_ENV === "production";
 
 
 export const googleLogin = async (req, res) => {
@@ -45,18 +47,21 @@ export const googleLogin = async (req, res) => {
       { expiresIn: "1d" }
     );
 
+    user.password = undefined;
+    const userData = attachResumeDownloadUrl(user.toObject());
+
   return res
   .cookie("token", jwtToken, {
     httpOnly: true,
-    secure: true,        // REQUIRED for HTTPS
-    sameSite: "none",    // REQUIRED for cross-domain
+    secure: isProd,
+    sameSite: isProd ? "none" : "lax",
     maxAge: 24 * 60 * 60 * 1000,
   })
 
       .status(200)
       .json({
         success: true,
-        user,
+        user: userData,
         isProfileComplete: user.isProfileComplete,
       });
 

@@ -1,6 +1,4 @@
 import mongoose from "mongoose";
-import { User } from "./user.model.js";
-
 const jobSchema = new mongoose.Schema({
     title: {
         type: String,
@@ -18,7 +16,7 @@ const jobSchema = new mongoose.Schema({
         type: Number,
         required: true
     },
-    experirenceLevel: {
+    experienceLevel: {
         type: Number,
               
     }

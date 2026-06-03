@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Navbar from "../shared/navbar";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -8,7 +8,7 @@ import axios from "axios";
 import { USER_API_END_POINT } from "../../utils/constant.js";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
-import { setLoading } from "@/redux/authslice";
+import { setLoading, setUser } from "@/redux/authslice";
 import { useDispatch, useSelector } from "react-redux";
 import { Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
@@ -22,9 +22,11 @@ const Signup = () => {
     password: "",
     role: "",
     file: "",
+    resume: "",
   });
 
   const { loading } = useSelector((store) => store.auth);
+  const { user } = useSelector((store) => store.auth);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -36,8 +38,38 @@ const Signup = () => {
     setInput({ ...input, file: e.target.files?.[0] });
   };
 
+  const changeResumeHandler = (e) => {
+    setInput({ ...input, resume: e.target.files?.[0] });
+  };
+
+  const getLandingPath = (loggedInUser) =>
+    loggedInUser?.role === "recruiter" ? "/admin/companies" : "/jobs";
+
+  useEffect(() => {
+    if (user?.isProfileComplete) {
+      navigate(getLandingPath(user), { replace: true });
+    }
+  }, [user, navigate]);
+
+  useEffect(() => {
+    if (input.role !== "student" && input.resume) {
+      setInput((prev) => ({ ...prev, resume: "" }));
+    }
+  }, [input.role, input.resume]);
+
   const submitHandler = async (e) => {
     e.preventDefault();
+
+    if (
+      !input.fullname ||
+      !input.email ||
+      !input.phoneNumber ||
+      !input.password ||
+      !input.role
+    ) {
+      toast.error("All fields are required");
+      return;
+    }
 
     const formData = new FormData();
     formData.append("fullname", input.fullname);
@@ -45,7 +77,10 @@ const Signup = () => {
     formData.append("phoneNumber", input.phoneNumber);
     formData.append("password", input.password);
     formData.append("role", input.role);
-    if (input.file) formData.append("file", input.file);
+    if (input.file) formData.append("profilePhoto", input.file);
+    if (input.role === "student" && input.resume) {
+      formData.append("resume", input.resume);
+    }
 
     try {
       dispatch(setLoading(true));
@@ -175,9 +210,29 @@ const Signup = () => {
             <Input
               accept="image/*"
               type="file"
+              name="file"
               onChange={changeFileHandler}
             />
           </div>
+
+          {input.role === "student" && (
+            <div className="mb-7">
+              <Label className="font-medium mb-2 block">
+                Resume (PDF recommended)
+              </Label>
+              <Input
+                accept=".pdf,.doc,.docx"
+                type="file"
+                name="resume"
+                onChange={changeResumeHandler}
+              />
+              {input.resume && (
+                <p className="text-xs text-gray-500 mt-2">
+                  Selected: {input.resume.name}
+                </p>
+              )}
+            </div>
+          )}
 
           {/* Submit */}
           {loading ? (
@@ -236,10 +291,11 @@ const Signup = () => {
         );
 
        if (res.data.success) {
+  dispatch(setUser(res.data.user));
   if (!res.data.isProfileComplete) {
     navigate("/complete-profile");
   } else {
-    navigate("/");
+    navigate(getLandingPath(res.data.user));
   }
 }
 

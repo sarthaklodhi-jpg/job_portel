@@ -1,18 +1,24 @@
-import { useEffect } from "react";
 import { useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 
-const ProtectedRoute = ({ children }) => {
+const ProtectedRoute = ({
+  children,
+  allowedRoles = [],
+  requireCompleteProfile = true,
+}) => {
   const { user } = useSelector((store) => store.auth);
-  const navigate = useNavigate();
 
-  useEffect(() => {
-    if (!user || user.role !== "recruiter") {
-      navigate("/");
-    }
-  }, [user, navigate]);
+  if (!user) return <Navigate to="/login" replace />;
 
-  return <>{children}</>;
+  if (requireCompleteProfile && !user.isProfileComplete) {
+    return <Navigate to="/complete-profile" replace />;
+  }
+
+  if (allowedRoles.length > 0 && !allowedRoles.includes(user.role)) {
+    return <Navigate to={user.role === "recruiter" ? "/admin/companies" : "/jobs"} replace />;
+  }
+
+  return children;
 };
 
 export default ProtectedRoute;

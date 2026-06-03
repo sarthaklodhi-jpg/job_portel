@@ -30,7 +30,7 @@ const FilterCard = () => {
   useEffect(() =>{
     dispatch(setSearchedQuery(selectedValue));
 
-  }, [selectedValue]);
+  }, [selectedValue, dispatch]);
 
   return (
     <div className="p-5 bg-white border border-gray-200 rounded-lg shadow-sm">

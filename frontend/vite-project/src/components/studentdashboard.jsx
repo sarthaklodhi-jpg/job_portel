@@ -2,27 +2,35 @@ import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { Navigate, useNavigate } from "react-router-dom";
 import axios from "axios";
-import { USER_API_END_POINT, JOB_API_END_POINT } from "@/utils/constant";
+import { JOB_API_END_POINT } from "@/utils/constant";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import useGetAppliedJobs from "@/hook/usegetappliedjob";
+import {
+  EmptyState,
+  GradientHero,
+  PageShell,
+  SectionCard,
+  SkeletonGrid,
+  StatCard,
+} from "./shared/dashboard-primitives";
 
 const StudentDashboard = () => {
   const { user } = useSelector((state) => state.auth);
+  const appliedJobs = useSelector((state) => state.job.allAppliedJobs || []);
   const navigate = useNavigate();
 
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  /* ===== AUTH GUARD ===== */
-  if (!user) return <Navigate to="/login" />;
-  if (!user.isProfileComplete) return <Navigate to="/complete-profile" />;
-  if (user.role !== "student") return <Navigate to="/" />;
+  useGetAppliedJobs();
 
-  /* ===== FETCH JOBS ===== */
   useEffect(() => {
+    if (!user || !user.isProfileComplete || user.role !== "student") return;
+
     const fetchJobs = async () => {
       try {
-        const res = await axios.get(`${JOB_API_END_POINT}/get`, {
+        const res = await axios.get(`${JOB_API_END_POINT}/gets`, {
           withCredentials: true,
         });
         setJobs(res.data.jobs || []);
@@ -34,39 +42,69 @@ const StudentDashboard = () => {
     };
 
     fetchJobs();
-  }, []);
+  }, [user]);
+
+  if (!user) return <Navigate to="/login" />;
+  if (!user.isProfileComplete) return <Navigate to="/complete-profile" />;
+  if (user.role !== "student") return <Navigate to="/" />;
+
+  const profileFields = [
+    user.fullname,
+    user.email,
+    user.phoneNumber,
+    user.profile?.bio,
+    user.profile?.skills?.length,
+    user.profile?.resume || user.profile?.resumeDownloadUrl,
+  ];
+  const completion = Math.round(
+    (profileFields.filter(Boolean).length / profileFields.length) * 100
+  );
+  const latestJobs = jobs.slice(0, 6);
 
   return (
-    <div className="p-8">
-      <h1 className="text-3xl font-bold mb-2">
-        Welcome, {user.fullname} 👋
-      </h1>
-      <p className="text-gray-600 mb-6">
-        Browse jobs and apply easily
-      </p>
+    <PageShell>
+      <GradientHero
+        title={`Welcome, ${user.fullname}`}
+        subtitle="Track applications, keep your profile ready, and discover new roles."
+      />
 
-      {loading ? (
-        <p>Loading jobs...</p>
-      ) : jobs.length === 0 ? (
-        <p className="text-gray-500">No jobs available</p>
-      ) : (
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {jobs.map((job) => (
-            <div
-              key={job._id}
-              className="border rounded-xl p-5 shadow-sm bg-white"
-            >
+      <div className="grid gap-4 md:grid-cols-3 my-6">
+        <StatCard label="Applied Jobs" value={appliedJobs.length} />
+        <StatCard label="Profile Complete" value={`${completion}%`} />
+        <StatCard label="Latest Jobs" value={latestJobs.length} />
+      </div>
+
+      {!user.profile?.resumeDownloadUrl && (
+        <div className="mb-8 rounded-xl border border-amber-200 bg-amber-50 p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h2 className="font-semibold text-amber-900">Resume missing</h2>
+            <p className="text-sm text-amber-800">
+              Upload a resume so recruiters can review your application.
+            </p>
+          </div>
+          <Button variant="outline" onClick={() => navigate("/profile")}>
+            Upload Resume
+          </Button>
+        </div>
+      )}
+
+      <SectionCard title="Latest Jobs">
+        {loading ? (
+          <SkeletonGrid count={3} />
+        ) : latestJobs.length === 0 ? (
+          <EmptyState message="No jobs available yet." />
+        ) : (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {latestJobs.map((job) => (
+              <div key={job._id} className="border rounded-xl p-5 shadow-sm bg-white">
               <h2 className="font-semibold text-lg">{job.title}</h2>
               <p className="text-sm text-gray-500 mt-1">
-                {job.location} • {job.jobType}
+                {job.location} | {job.jobType}
               </p>
 
               <div className="mt-4 flex gap-3">
-                <Button
-                  size="sm"
-                  onClick={() => navigate(`/description/${job._id}`)}
-                >
-                  View
+                <Button size="sm" onClick={() => navigate(`/description/${job._id}`)}>
+                  View Details
                 </Button>
                 <Button
                   size="sm"
@@ -76,11 +114,12 @@ const StudentDashboard = () => {
                   Apply
                 </Button>
               </div>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </SectionCard>
+    </PageShell>
   );
 };
 

@@ -3,11 +3,15 @@ import { APPLICATION_API_END_POINT } from "../utils/constant.js";
 import axios from "axios";
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
 
 const useGetAppliedJobs = () => {
   const dispatch = useDispatch();
+  const { user } = useSelector((store) => store.auth);
 
   useEffect(() => {
+    if (!user || user.role !== "student") return;
+
     const fetchAppliedJobs = async () => {
       try {
         const res = await axios.get(
@@ -21,12 +25,14 @@ const useGetAppliedJobs = () => {
 
         }
       } catch (error) {
-        console.log("Error fetching applied jobs:", error);
+        if (error?.response?.status !== 401) {
+          console.log("Error fetching applied jobs:", error);
+        }
       }
     };
 
     fetchAppliedJobs();
-  }, [dispatch]);
+  }, [dispatch, user]);
 };
 
 export default useGetAppliedJobs;

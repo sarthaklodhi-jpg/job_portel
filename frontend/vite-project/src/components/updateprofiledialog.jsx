@@ -78,7 +78,7 @@ const UpdateProfileDialog = ({ open, setOpen }) => {
         setOpen(false);
       }
     } catch (error) {
-      toast.error("Failed to update profile");
+      toast.error(error?.response?.data?.message || "Failed to update profile");
     } finally {
       setLocalLoading(false);
     }
@@ -115,7 +115,10 @@ const UpdateProfileDialog = ({ open, setOpen }) => {
             <Input name="skills" value={input.skills} onChange={changeHandler} placeholder="HTML, CSS, React" />
 
             {/* Resume */}
-            <Input type="file" accept="application/pdf" onChange={resumeHandler} />
+            <Input type="file" accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" onChange={resumeHandler} />
+            {input.resume && (
+              <p className="text-xs text-gray-500">Selected resume: {input.resume.name}</p>
+            )}
 
             <DialogFooter>
               <Button disabled={localLoading} className="w-full">

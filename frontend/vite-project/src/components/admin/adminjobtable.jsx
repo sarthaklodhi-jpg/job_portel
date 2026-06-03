@@ -15,13 +15,12 @@ import {
 } from "@/components/ui/popover";
 import {
   MoreHorizontal,
-  Edit2,
   Users,
   Briefcase,
   Trash2,
 } from "lucide-react";
 import { useSelector } from "react-redux";
-import useGetAllJobs from "@/hook/usegetalljobs.jsx";
+import useGetAllAdminJobs from "@/hook/usegetalladminjobs.jsx";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
@@ -56,7 +55,7 @@ const CompanyAvatar = ({ name, logo }) => {
 /* ---------------- ADMIN JOBS TABLE ---------------- */
 
 const AdminJobsTable = () => {
-  useGetAllJobs();
+  useGetAllAdminJobs();
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
@@ -170,17 +169,6 @@ const AdminJobsTable = () => {
                     </PopoverTrigger>
 
                     <PopoverContent align="end" className="w-40 p-1">
-                      <button
-                        onClick={() =>
-                         navigate(`/admin/jobs/${job._id}`)
-
-                        }
-                        className="flex w-full items-center gap-2 px-2 py-2 text-sm hover:bg-gray-100 rounded-md"
-                      >
-                        <Edit2 className="h-4 w-4" />
-                        Edit
-                      </button>
-
                       <button
                         onClick={() =>
                           navigate(

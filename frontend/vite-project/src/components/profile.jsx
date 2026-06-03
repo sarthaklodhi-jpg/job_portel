@@ -118,7 +118,7 @@ const Profile = () => {
           </Label>
 
           {resumeDownloadUrl ? (
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-3">
               <a
                 href={resumeDownloadUrl}
                 target="_blank"
@@ -132,6 +132,19 @@ const Profile = () => {
                 size="sm"
                 variant="outline"
                 onClick={() => window.open(resumeDownloadUrl, "_blank")}
+              >
+                Open
+              </Button>
+              <Button
+                size="sm"
+                onClick={() => {
+                  const link = document.createElement("a");
+                  link.href = resumeDownloadUrl;
+                  link.download = resumeName;
+                  document.body.appendChild(link);
+                  link.click();
+                  document.body.removeChild(link);
+                }}
               >
                 Download
               </Button>

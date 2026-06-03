@@ -38,11 +38,13 @@ export const postJob = async (req, res) => {
     const job = await Job.create({
       title,
       description,
-      requirements, // should be an array (e.g., ["HTML", "CSS"])
+      requirements: Array.isArray(requirements)
+        ? requirements
+        : requirements.split(",").map((item) => item.trim()).filter(Boolean),
       salary: Number(salary),
       location,
       jobType,
-      experienceLevel: experience,
+      experienceLevel: Number(experience),
       position: Number(position),
       company: companyId,
       created_by: userId,
@@ -100,9 +102,11 @@ export const getAllJobs = async (req, res) => {
 
     // ✅ If no jobs found
     if (!jobs || jobs.length === 0) {
-      return res.status(404).json({
-        success: false,
+      return res.status(200).json({
+        success: true,
         message: "No jobs found.",
+        count: 0,
+        jobs: [],
       });
     }
 
@@ -140,6 +144,9 @@ export const getJobById = async (req, res) => {
     // ✅ Fetch the job by ID from database
     // `.populate("company")` → Optional: includes company details
     const job = await Job.findById(req.params.id)
+      .populate({
+        path: "company"
+      })
       .populate({
         path: "applications"
       }) // 👈 this is the key
@@ -179,9 +186,10 @@ export const getAdminJobs = async (req, res) => {
     });
 
     if (!jobs || jobs.length === 0) {
-      return res.status(404).json({
-        success: false,
+      return res.status(200).json({
+        success: true,
         message: "No jobs found for this admin.",
+        jobs: [],
       });
     }
 

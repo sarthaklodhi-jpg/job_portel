@@ -8,13 +8,42 @@ import jwt from "jsonwebtoken";
 import cloudinary from "../utils/cloudinary.js";
 import getDataUri from "../utils/datauri.js";
 import { attachResumeDownloadUrl } from "../utils/resume.js";
+import asyncHandler from "../middlewares/asyncHandler.js";
+import { ApiError } from "../middlewares/errorHandler.js";
+
+const getUploadedFile = (req, fieldName) => {
+  if (req.files?.[fieldName]?.[0]) return req.files[fieldName][0];
+  if (fieldName === "profilePhoto" && req.files?.file?.[0]) return req.files.file[0];
+  if (fieldName === "profilePhoto" && req.file) return req.file;
+  return null;
+};
+
+const uploadProfilePhoto = async (file) => {
+  const fileUri = getDataUri(file);
+  const uploadRes = await cloudinary.uploader.upload(fileUri.content, {
+    folder: "profile_photos",
+    resource_type: "image",
+  });
+  return uploadRes.secure_url;
+};
+
+const uploadResume = async (file) => {
+  const fileUri = getDataUri(file);
+  return cloudinary.uploader.upload(fileUri.content, {
+    resource_type: "raw",
+    folder: "resumes",
+    use_filename: true,
+    unique_filename: false,
+  });
+};
 
 // ==========================================
 // 🧩 REGISTER CONTROLLER
 // ==========================================
 export const register = async (req, res) => {
   try {
-    const { fullname, email, phoneNumber, password, role } = req.body;
+    const { fullname, phoneNumber, password, role } = req.body;
+    const email = req.body.email?.trim().toLowerCase();
 
     if (!fullname || !email || !phoneNumber || !password || !role) {
       return res.status(400).json({
@@ -35,22 +64,37 @@ export const register = async (req, res) => {
 
     // Optional profile photo
     let profilePhoto = "";
-    if (req.file && req.file.buffer) {
-      const fileUri = getDataUri(req.file);
-      const uploadRes = await cloudinary.uploader.upload(fileUri.content, {
-        folder: "profile_photos",
-        resource_type: "image",
-      });
-      profilePhoto = uploadRes.secure_url;
+    const profilePhotoFile = getUploadedFile(req, "profilePhoto");
+    if (profilePhotoFile?.buffer) {
+      try {
+        profilePhoto = await uploadProfilePhoto(profilePhotoFile);
+      } catch (uploadError) {
+        console.error("Profile photo upload failed:", uploadError.message);
+      }
+    }
+
+    let resume = "";
+    let resumeOriginalName = "";
+    const resumeFile = getUploadedFile(req, "resume");
+    if (role === "student" && resumeFile?.buffer) {
+      try {
+        const uploadRes = await uploadResume(resumeFile);
+        resume = uploadRes.public_id;
+        resumeOriginalName = resumeFile.originalname;
+      } catch (uploadError) {
+        console.error("Resume upload failed:", uploadError.message);
+      }
     }
 
     const newUser = await User.create({
-      fullname,
+      fullname: fullname.trim(),
       email,
-      phoneNumber,
+      phoneNumber: phoneNumber.trim(),
       password: hashedPassword,
       role,
-      profile: { profilePhoto },
+      authProvider: "local",
+      isProfileComplete: true,
+      profile: { profilePhoto, resume, resumeOriginalName },
     });
 
     let userData = {
@@ -59,6 +103,8 @@ export const register = async (req, res) => {
       email: newUser.email,
       phoneNumber: newUser.phoneNumber,
       role: newUser.role,
+      authProvider: newUser.authProvider,
+      isProfileComplete: newUser.isProfileComplete,
       profile: newUser.profile,
     };
 
@@ -71,6 +117,20 @@ export const register = async (req, res) => {
     });
   } catch (error) {
     console.error("Register error:", error);
+    if (error.name === "ValidationError") {
+      return res.status(400).json({
+        success: false,
+        message: Object.values(error.errors)[0]?.message || "Invalid signup details",
+      });
+    }
+
+    if (error.code === 11000) {
+      return res.status(400).json({
+        success: false,
+        message: "User already exists",
+      });
+    }
+
     return res.status(500).json({
       success: false,
       message: "Server error",
@@ -84,15 +144,9 @@ export const register = async (req, res) => {
 const isProd = process.env.NODE_ENV === "production";
 
 export const login = async (req, res) => {
-   console.log("🔥 LOGIN HIT");
-  console.log("ENV CHECK:", {
-    SECRET_KEY: !!process.env.SECRET_KEY,
-    NODE_ENV: process.env.NODE_ENV,
-    GOOGLE_CLIENT_ID: !!process.env.GOOGLE_CLIENT_ID,
-  });
-  
   try {
-    const { email, password, role } = req.body;
+    const { password, role } = req.body;
+    const email = req.body.email?.trim().toLowerCase();
 
     if (!email || !password || !role) {
       return res.status(400).json({
@@ -106,6 +160,13 @@ export const login = async (req, res) => {
       return res.status(400).json({
         success: false,
         message: "Incorrect email or password",
+      });
+    }
+
+    if (!user.password) {
+      return res.status(400).json({
+        success: false,
+        message: "This account uses Google login. Please continue with Google.",
       });
     }
 
@@ -138,6 +199,8 @@ export const login = async (req, res) => {
       email: user.email,
       phoneNumber: user.phoneNumber,
       role: user.role,
+      authProvider: user.authProvider,
+      isProfileComplete: user.isProfileComplete,
       profile: user.profile,
     };
 
@@ -181,24 +244,29 @@ export const logout = async (req, res) => {
 // ==========================================
 // 🧩 UPDATE PROFILE CONTROLLER
 // ==========================================
-export const updateProfile = async (req, res) => {
-  try {
+export const updateProfile = asyncHandler(async (req, res) => {
     const { fullname, email, phoneNumber, bio, skills } = req.body;
+    const {
+      designation,
+      location,
+      experience,
+      companyName,
+      companyWebsite,
+      companyDescription,
+      linkedin,
+      github,
+      portfolio,
+      twitter,
+    } = req.body;
     const userId = req.id;
 
     if (!userId) {
-      return res.status(401).json({
-        success: false,
-        message: "Unauthorized",
-      });
+      throw new ApiError(401, "Unauthorized");
     }
 
     const user = await User.findById(userId);
     if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: "User not found",
-      });
+      throw new ApiError(404, "User not found");
     }
 
     if (!user.profile) user.profile = {};
@@ -207,7 +275,7 @@ export const updateProfile = async (req, res) => {
     // 🧠 SKILLS
     // ===============================
     let skillsArray = [];
-    if (skills) {
+    if (typeof skills === "string" && skills.trim()) {
       try {
         skillsArray = JSON.parse(skills);
       } catch {
@@ -225,7 +293,23 @@ export const updateProfile = async (req, res) => {
     if (email) user.email = email.trim().toLowerCase();
     if (phoneNumber) user.phoneNumber = phoneNumber.trim();
     if (bio) user.profile.bio = bio.trim();
-    if (skillsArray.length) user.profile.skills = skillsArray;
+    if (Array.isArray(skillsArray)) user.profile.skills = skillsArray;
+    if (github !== undefined) user.profile.github = String(github || "").trim();
+    if (linkedin !== undefined) user.profile.linkedin = String(linkedin || "").trim();
+    if (portfolio !== undefined) user.profile.portfolio = String(portfolio || "").trim();
+
+    if (designation !== undefined) user.profile.designation = String(designation || "").trim();
+    if (location !== undefined) user.profile.location = String(location || "").trim();
+    if (experience !== undefined) user.profile.experience = String(experience || "").trim();
+    if (companyName !== undefined) user.profile.companyName = String(companyName || "").trim();
+    if (companyWebsite !== undefined) user.profile.companyWebsite = String(companyWebsite || "").trim();
+    if (companyDescription !== undefined) user.profile.companyDescription = String(companyDescription || "").trim();
+    user.profile.socialLinks = {
+      ...(user.profile.socialLinks || {}),
+      linkedin: String(linkedin || user.profile.socialLinks?.linkedin || "").trim(),
+      twitter: String(twitter || user.profile.socialLinks?.twitter || "").trim(),
+      website: String(companyWebsite || user.profile.socialLinks?.website || "").trim(),
+    };
 
     // ===============================
     // 📸 PROFILE PHOTO
@@ -243,6 +327,16 @@ export const updateProfile = async (req, res) => {
       );
 
       user.profile.profilePhoto = uploadRes.secure_url;
+    }
+
+    if (req.files?.companyLogo?.[0]) {
+      const file = req.files.companyLogo[0];
+      const fileUri = getDataUri(file);
+      const uploadRes = await cloudinary.uploader.upload(fileUri.content, {
+        folder: "company_logos",
+        resource_type: "image",
+      });
+      user.profile.companyLogo = uploadRes.secure_url;
     }
 
     // ===============================
@@ -276,21 +370,13 @@ export const updateProfile = async (req, res) => {
       message: "Profile updated successfully",
       user: updatedUser,
     });
-  } catch (error) {
-    console.error("Update profile error:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Server error",
-    });
-  }
-};
+});
 
 
 export const completeProfile = async (req, res) => {
   try {
     const userId = req.id;
     const { phoneNumber, password, role } = req.body;
-    const file = req.file ?? null;
 
     if (!userId) {
       return res.status(401).json({
@@ -329,32 +415,41 @@ export const completeProfile = async (req, res) => {
     }
 
     // ✅ OPTIONAL PROFILE PHOTO
-    if (file && file.buffer) {
-      const fileUri = getDataUri(file);
-      const uploadRes = await cloudinary.uploader.upload(
-        fileUri.content,
-        {
-          folder: "profile_photos",
-          resource_type: "image",
-        }
-      );
-      user.profile.profilePhoto = uploadRes.secure_url;
+    const profilePhotoFile = getUploadedFile(req, "profilePhoto");
+    if (profilePhotoFile?.buffer) {
+      try {
+        user.profile.profilePhoto = await uploadProfilePhoto(profilePhotoFile);
+      } catch (uploadError) {
+        console.error("Profile photo upload failed:", uploadError.message);
+      }
+    }
+
+    const resumeFile = getUploadedFile(req, "resume");
+    if (role === "student" && resumeFile?.buffer) {
+      try {
+        const uploadRes = await uploadResume(resumeFile);
+        user.profile.resume = uploadRes.public_id;
+        user.profile.resumeOriginalName = resumeFile.originalname;
+      } catch (uploadError) {
+        console.error("Resume upload failed:", uploadError.message);
+      }
     }
 
     user.phoneNumber = phoneNumber;
     user.password = hashedPassword;
     user.role = role;
     user.isProfileComplete = true;
-    user.authProvider = "local";
 
     await user.save();
 
     user.password = undefined;
 
+    const updatedUser = attachResumeDownloadUrl(user.toObject());
+
     return res.status(200).json({
       success: true,
       message: "Profile completed successfully",
-      user,
+      user: updatedUser,
     });
   } catch (error) {
     console.error("Complete profile error:", error);

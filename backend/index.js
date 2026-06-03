@@ -8,6 +8,7 @@ import userRoutes from "./routes/user.routes.js";
 import companyRoutes from "./routes/company.routes.js";
 import jobRoutes from "./routes/job.route.js";
 import applicationRoutes from "./routes/application.route.js";
+import { errorHandler, notFound } from "./middlewares/errorHandler.js";
 
 dotenv.config();
 
@@ -45,11 +46,13 @@ app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/company", companyRoutes);
 app.use("/api/v1/job", jobRoutes);
 app.use("/api/v1/application", applicationRoutes);
+app.use(notFound);
+app.use(errorHandler);
 
 /* =========================
    SERVER
 ========================= */
-const PORT = process.env.PORT || 8000;
+const PORT = Number.parseInt(process.env.PORT, 10) || 8000;
 
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);

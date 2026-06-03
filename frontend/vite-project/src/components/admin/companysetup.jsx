@@ -27,7 +27,7 @@ const CompanySetup = () => {
     file: null,
   });
 
-  const singlecompany = useSelector((state) => state.company);
+  const singleCompany = useSelector((state) => state.company.singleCompany);
   const [loading, setLoading] = useState(false);
 
   const changeEventHandler = (e) => {
@@ -77,13 +77,13 @@ const CompanySetup = () => {
 
   useEffect(() => {
     setInput({
-      name: singlecompany.name || "",
-      description: singlecompany.description || "",
-      website: singlecompany.website || "",
-      location: singlecompany.location || "",
-      file: singlecompany.file || null,
+      name: singleCompany?.name || "",
+      description: singleCompany?.description || "",
+      website: singleCompany?.website || "",
+      location: singleCompany?.location || "",
+      file: null,
     });
-  }, [singlecompany]);
+  }, [singleCompany]);
 
   return (
     <>

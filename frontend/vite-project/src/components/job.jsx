@@ -1,8 +1,6 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Bookmark } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import CompanyAvatar from "./shared/companyavatar";
@@ -44,36 +42,21 @@ const Job = ({ job }) => {
             : `${daysAgoFunction(job?.createdAt)} days ago`}
         </span>
 
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-8 w-8 rounded-full hover:bg-gray-100"
-        >
-          <Bookmark className="h-4 w-4" />
-        </Button>
+        <span className="rounded-full bg-gray-100 px-3 py-1 font-medium text-gray-600">
+          {job?.jobType || "Job"}
+        </span>
       </div>
 
       {/* Company Info */}
       <div className="flex items-center gap-4 my-5">
-       <div className="flex items-center gap-3 mb-2">
-  <CompanyAvatar
-    name={job?.company?.name}
-    logo={job?.company?.logo}
-    size={40}
-  />
-
-  <div>
-    <h1 className="font-semibold text-gray-800">
-      {job?.company?.name}
-    </h1>
-    <p className="text-xs text-gray-500">{job?.location}</p>
-  </div>
-</div>
-
-
-        <div>
+        <CompanyAvatar
+          name={job?.company?.name}
+          logo={job?.company?.logo}
+          size={44}
+        />
+        <div className="min-w-0">
           <h1 className="font-semibold text-gray-800">
-            {job?.company?.name}
+            {job?.company?.name || "Company"}
           </h1>
           <p className="text-xs text-gray-500">
             {job?.location || "India"}
@@ -131,10 +114,11 @@ const Job = ({ job }) => {
         </Button>
 
         <Button
+          onClick={() => navigate(`/description/${job?._id}`)}
           className="flex-1 bg-[#7209b7] hover:bg-[#5c0991] 
                      text-white text-sm shadow-md"
         >
-          Save Job
+          Apply Now
         </Button>
       </div>
     </motion.div>

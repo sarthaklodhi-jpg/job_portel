@@ -15,7 +15,6 @@ import {
 } from "@/components/ui/popover";
 import {
   MoreHorizontal,
-  FileText,
   CheckCircle,
   XCircle,
 } from "lucide-react";
@@ -51,7 +50,7 @@ const ApplicantsTable = () => {
 
         toast.success(`Application ${res.data.updatedStatus}`);
       }
-    } catch (error) {
+    } catch {
       toast.error("Error updating status");
     }
   };
@@ -76,23 +75,23 @@ const ApplicantsTable = () => {
 <TableBody>
   {applications.map((item) => (
     <TableRow key={item._id}>
-      <TableCell>{item.applicant.fullname}</TableCell>
+      <TableCell>{item.applicant?.fullname || "-"}</TableCell>
 
-      <TableCell>{item.applicant.email}</TableCell>
+      <TableCell>{item.applicant?.email || "-"}</TableCell>
 
       <TableCell>
-        {item.applicant.phoneNumber || "-"}
+        {item.applicant?.phoneNumber || "-"}
       </TableCell>
 
       <TableCell>
-        {item.applicant.profile?.resume ? (
+        {item.applicant?.profile?.resumeDownloadUrl ? (
           <a
-            href={item.applicant.profile.resume}
+            href={item.applicant.profile.resumeDownloadUrl}
             target="_blank"
             rel="noreferrer"
             className="text-blue-600 underline"
           >
-            View Resume
+            {item.applicant.profile.resumeOriginalName || "View Resume"}
           </a>
         ) : (
           "-"

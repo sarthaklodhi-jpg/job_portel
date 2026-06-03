@@ -1,24 +1,19 @@
-// backend/utils/resume.js
 import cloudinary from "./cloudinary.js";
 
 export const attachResumeDownloadUrl = (user) => {
   try {
-    // 🛑 HARD GUARDS — login must NEVER fail
-    if (
-      !user?.profile?.resume ||
-      !process.env.CLOUD_NAME
-    ) {
+    const cloudName =
+      process.env.CLOUDINARY_CLOUD_NAME || process.env.CLOUD_NAME;
+
+    if (!user?.profile?.resume || !cloudName) {
       return user;
     }
 
-    const resumeDownloadUrl = cloudinary.url(
-      user.profile.resume,
-      {
-        resource_type: "raw",
-        secure: true,
-        attachment: user.profile.resumeOriginalName,
-      }
-    );
+    const resumeDownloadUrl = cloudinary.url(user.profile.resume, {
+      resource_type: "raw",
+      secure: true,
+      attachment: user.profile.resumeOriginalName || "resume",
+    });
 
     return {
       ...user,
@@ -29,6 +24,6 @@ export const attachResumeDownloadUrl = (user) => {
     };
   } catch (error) {
     console.error("attachResumeDownloadUrl error:", error.message);
-    return user; // 👈 NEVER crash login
+    return user;
   }
 };

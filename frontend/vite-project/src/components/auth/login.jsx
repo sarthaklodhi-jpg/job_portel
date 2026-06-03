@@ -30,6 +30,15 @@ const Login = () => {
     setInput({ ...input, [e.target.name]: e.target.value });
   };
 
+  const getLandingPath = (loggedInUser) =>
+    loggedInUser?.role === "recruiter" ? "/admin/companies" : "/jobs";
+
+  useEffect(() => {
+    if (user?.isProfileComplete) {
+      navigate(getLandingPath(user), { replace: true });
+    }
+  }, [user, navigate]);
+
   const submitHandler = async (e) => {
     e.preventDefault();
 
@@ -53,7 +62,7 @@ const Login = () => {
       if (res.data.success) {
         dispatch(setUser(res.data.user));
         toast.success(res.data.message);
-        navigate("/");
+        navigate(getLandingPath(res.data.user));
       }
     } catch (error) {
       toast.error(
@@ -207,7 +216,7 @@ const Login = () => {
   if (!res.data.isProfileComplete) {
     navigate("/complete-profile");
   } else {
-    navigate("/");
+    navigate(getLandingPath(res.data.user));
   }
 }
 

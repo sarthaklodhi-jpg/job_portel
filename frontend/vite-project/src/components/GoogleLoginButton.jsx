@@ -1,18 +1,21 @@
 import { GoogleLogin } from "@react-oauth/google";
 import axios from "axios";
+import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
+import { USER_API_END_POINT } from "@/utils/constant";
+import { setUser } from "@/redux/authslice";
 
-const GoogleLoginButton = ({ role }) => {
+const GoogleLoginButton = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const handleSuccess = async (credentialResponse) => {
     try {
       const res = await axios.post(
-        `${import.meta.env.VITE_BACKEND_URL}/api/v1/users/google`,
+        `${USER_API_END_POINT}/google`,
         {
           token: credentialResponse.credential,
-          role: input.role || null, // "student" or "recruiter"
         },
         {
           withCredentials: true, // 🔴 REQUIRED
@@ -20,8 +23,9 @@ const GoogleLoginButton = ({ role }) => {
       );
 
       if (res.data.success) {
+        dispatch(setUser(res.data.user));
         toast.success("Logged in with Google");
-        navigate("/"); // or dashboard
+        navigate(res.data.isProfileComplete ? "/" : "/complete-profile");
       }
     } catch (err) {
       console.error(err);

@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
 import { setSingleJob } from "../redux/jobslice.js";
@@ -15,6 +15,7 @@ import CompanyAvatar from "./shared/companyavatar";
 
 const JobDescription = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { id: jobId } = useParams();
 
   const { singleJob } = useSelector((store) => store.job);
@@ -22,7 +23,13 @@ const JobDescription = () => {
 
   const isInitiallyApplied =
     singleJob?.applications?.some(
-      (application) => application?.applicant?._id === user?._id
+      (application) => {
+        const applicantId =
+          typeof application?.applicant === "object"
+            ? application?.applicant?._id
+            : application?.applicant;
+        return applicantId === user?._id;
+      }
     ) || false;
 
   const [isApplied, setIsApplied] = useState(isInitiallyApplied);
@@ -30,6 +37,23 @@ const JobDescription = () => {
 
   // ================= APPLY JOB =================
   const applyJobHandler = async () => {
+    if (!user) {
+      toast.error("Please login as a student to apply");
+      navigate("/login");
+      return;
+    }
+
+    if (user.role !== "student") {
+      toast.error("Recruiters cannot apply to jobs");
+      return;
+    }
+
+    if (!user.profile?.resume && !user.profile?.resumeDownloadUrl) {
+      toast.error("Please upload your resume before applying");
+      navigate("/profile");
+      return;
+    }
+
     try {
       setLoading(true);
       const res = await axios.post(
@@ -64,7 +88,7 @@ const JobDescription = () => {
   };
 
   // ================= FETCH JOB =================
-  const fetchSingleJob = async () => {
+  const fetchSingleJob = useCallback(async () => {
     try {
       const res = await axios.get(`${JOB_API_END_POINT}/get/${jobId}`, {
         withCredentials: true,
@@ -74,18 +98,24 @@ const JobDescription = () => {
         dispatch(setSingleJob(res.data.job));
         setIsApplied(
           res.data.job.applications?.some(
-            (application) => application?.applicant === user?._id
+            (application) => {
+              const applicantId =
+                typeof application?.applicant === "object"
+                  ? application?.applicant?._id
+                  : application?.applicant;
+              return applicantId === user?._id;
+            }
           )
         );
       }
     } catch (error) {
       console.error("Error fetching job:", error);
     }
-  };
+  }, [dispatch, jobId, user?._id]);
 
   useEffect(() => {
     if (jobId) fetchSingleJob();
-  }, [jobId, user?._id]);
+  }, [fetchSingleJob, jobId]);
 
   if (!singleJob) {
     return (

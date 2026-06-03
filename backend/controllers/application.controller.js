@@ -1,5 +1,6 @@
 import { Application } from "../models/application.model.js"; // fixed import path
 import { Job } from "../models/job.model.js"; // fixed import path
+import { attachResumeDownloadUrl } from "../utils/resume.js";
 
 export const applyJob = async (req, res) => {
   try {
@@ -73,9 +74,10 @@ export const getAppliedJobs = async (req, res) => {
 
     // Check if no applications exist
     if (!applications || applications.length === 0) {
-      return res.status(404).json({
+      return res.status(200).json({
         message: "No applications found.",
-        success: false,
+        applications: [],
+        success: true,
       });
     }
 
@@ -116,10 +118,18 @@ export const getApplicants = async (req, res) => {
       });
     }
 
+    const applicants = job.applications.map((application) => {
+      const plainApplication = application.toObject();
+      if (plainApplication.applicant) {
+        plainApplication.applicant = attachResumeDownloadUrl(plainApplication.applicant);
+      }
+      return plainApplication;
+    });
+
     // Send response with applicants
     return res.status(200).json({
       totalApplicants: job.applications.length,
-      applicants: job.applications,
+      applicants,
       success: true,
     });
   } catch (error) {

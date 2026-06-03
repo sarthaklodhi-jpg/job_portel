@@ -20,6 +20,7 @@ const CompleteProfile = () => {
     confirmPassword: "",
     role: "",
     file: null,
+    resume: null,
   });
 
   const changeHandler = (e) => {
@@ -28,6 +29,10 @@ const CompleteProfile = () => {
 
   const fileHandler = (e) => {
     setInput({ ...input, file: e.target.files[0] });
+  };
+
+  const resumeHandler = (e) => {
+    setInput({ ...input, resume: e.target.files[0] });
   };
 
   const submitHandler = async (e) => {
@@ -52,7 +57,10 @@ const CompleteProfile = () => {
     formData.append("phoneNumber", input.phoneNumber);
     formData.append("password", input.password);
     formData.append("role", input.role);
-    if (input.file) formData.append("file", input.file);
+    if (input.file) formData.append("profilePhoto", input.file);
+    if (input.role === "student" && input.resume) {
+      formData.append("resume", input.resume);
+    }
 
     try {
       const res = await axios.post(
@@ -66,7 +74,7 @@ const CompleteProfile = () => {
         toast.success("Profile completed successfully");
 
         // ✅ ROLE-BASED REDIRECT
-      navigate("/");
+      navigate(res.data.user?.role === "recruiter" ? "/admin/companies" : "/jobs");
 
       }
     } catch (error) {
@@ -153,6 +161,18 @@ const CompleteProfile = () => {
           <Label>Profile Photo (optional)</Label>
           <Input type="file" accept="image/*" onChange={fileHandler} />
         </div>
+
+        {input.role === "student" && (
+          <div className="mb-6">
+            <Label>Resume (PDF recommended)</Label>
+            <Input type="file" accept=".pdf,.doc,.docx" onChange={resumeHandler} />
+            {input.resume && (
+              <p className="text-xs text-gray-500 mt-2">
+                Selected: {input.resume.name}
+              </p>
+            )}
+          </div>
+        )}
 
         <Button
           type="submit"
