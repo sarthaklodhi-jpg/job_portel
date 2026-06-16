@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useDispatch } from "react-redux";
 import { setSearchedQuery } from "@/redux/jobslice";
 
@@ -24,7 +23,12 @@ const FilterCard = () => {
   const dispatch = useDispatch();
 
   const changeHandler = (value) => {
-    setSelectedValue(value);
+    // Toggle: if clicking the same filter, deselect it
+    if (selectedValue === value) {
+      setSelectedValue('');
+    } else {
+      setSelectedValue(value);
+    }
   };
 
   useEffect(() =>{
@@ -44,19 +48,26 @@ const FilterCard = () => {
             <h2 className="font-semibold text-lg mb-2 text-[#6A38C2]">
               {data.filterType}
             </h2>
-            <RadioGroup value = {selectedValue} onValueChange={changeHandler} >
+            <div>
               {data.array.map((item, idx) => (
                 <div
                   key={idx}
                   className="flex items-center space-x-2 mb-2 cursor-pointer"
+                  onClick={() => changeHandler(item)}
                 >
-                  <RadioGroupItem value={item} id={`${data.filterType}-${idx}`} />
-                  <Label htmlFor={`${data.filterType}-${idx}`} className="text-gray-700">
+                  <input
+                    type="radio"
+                    id={`${data.filterType}-${idx}`}
+                    checked={selectedValue === item}
+                    onChange={() => {}}
+                    className="cursor-pointer"
+                  />
+                  <Label htmlFor={`${data.filterType}-${idx}`} className="text-gray-700 cursor-pointer">
                     {item}
                   </Label>
                 </div>
               ))}
-            </RadioGroup>
+            </div>
           </div>
         ))}
       </div>

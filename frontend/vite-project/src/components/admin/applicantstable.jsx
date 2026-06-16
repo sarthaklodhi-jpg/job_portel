@@ -22,6 +22,7 @@ import { useSelector, useDispatch } from "react-redux";
 import axios from "axios";
 import { toast } from "react-hot-toast";
 import { APPLICATION_API_END_POINT } from "@/utils/constant";
+import { downloadResume, getResumeName, getResumeUrl, openResume } from "@/utils/resume";
 import { updateApplicationStatus } from "@/redux/applicationsSlice";
 import { motion } from "framer-motion";
 
@@ -84,15 +85,23 @@ const ApplicantsTable = () => {
       </TableCell>
 
       <TableCell>
-        {item.applicant?.profile?.resumeDownloadUrl ? (
-          <a
-            href={item.applicant.profile.resumeDownloadUrl}
-            target="_blank"
-            rel="noreferrer"
-            className="text-blue-600 underline"
-          >
-            {item.applicant.profile.resumeOriginalName || "View Resume"}
-          </a>
+        {getResumeUrl(item.applicant?.profile) ? (
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => openResume(item.applicant?.profile)}
+              className="text-blue-600 underline"
+            >
+              Open
+            </button>
+            <button
+              type="button"
+              onClick={() => downloadResume(item.applicant?.profile)}
+              className="text-blue-600 underline"
+            >
+              {getResumeName(item.applicant?.profile)}
+            </button>
+          </div>
         ) : (
           "-"
         )}

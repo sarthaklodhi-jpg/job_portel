@@ -11,6 +11,19 @@ import { attachResumeDownloadUrl } from "../utils/resume.js";
 import asyncHandler from "../middlewares/asyncHandler.js";
 import { ApiError } from "../middlewares/errorHandler.js";
 
+const sanitizeFileBaseName = (filename = "resume") =>
+  filename
+    .replace(/\.[^/.]+$/, "")
+    .replace(/[^a-zA-Z0-9-_]/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "")
+    .slice(0, 80) || "resume";
+
+const getFileExtension = (filename = "") => {
+  const match = filename.match(/\.[a-zA-Z0-9]+$/);
+  return match ? match[0].toLowerCase() : "";
+};
+
 const getUploadedFile = (req, fieldName) => {
   if (req.files?.[fieldName]?.[0]) return req.files[fieldName][0];
   if (fieldName === "profilePhoto" && req.files?.file?.[0]) return req.files.file[0];
@@ -29,10 +42,14 @@ const uploadProfilePhoto = async (file) => {
 
 const uploadResume = async (file) => {
   const fileUri = getDataUri(file);
+  const extension = getFileExtension(file.originalname);
+  const publicId = `${Date.now()}-${sanitizeFileBaseName(file.originalname)}${extension}`;
+
   return cloudinary.uploader.upload(fileUri.content, {
     resource_type: "raw",
     folder: "resumes",
-    use_filename: true,
+    public_id: publicId,
+    use_filename: false,
     unique_filename: false,
   });
 };
@@ -74,12 +91,14 @@ export const register = async (req, res) => {
     }
 
     let resume = "";
+    let resumeUrl = "";
     let resumeOriginalName = "";
     const resumeFile = getUploadedFile(req, "resume");
     if (role === "student" && resumeFile?.buffer) {
       try {
         const uploadRes = await uploadResume(resumeFile);
         resume = uploadRes.public_id;
+        resumeUrl = uploadRes.secure_url;
         resumeOriginalName = resumeFile.originalname;
       } catch (uploadError) {
         console.error("Resume upload failed:", uploadError.message);
@@ -94,7 +113,7 @@ export const register = async (req, res) => {
       role,
       authProvider: "local",
       isProfileComplete: true,
-      profile: { profilePhoto, resume, resumeOriginalName },
+      profile: { profilePhoto, resume, resumeUrl, resumeOriginalName },
     });
 
     let userData = {
@@ -357,6 +376,7 @@ export const updateProfile = asyncHandler(async (req, res) => {
       );
 
       user.profile.resume = uploadRes.public_id;
+      user.profile.resumeUrl = uploadRes.secure_url;
       user.profile.resumeOriginalName = file.originalname;
     }
 
@@ -429,6 +449,7 @@ export const completeProfile = async (req, res) => {
       try {
         const uploadRes = await uploadResume(resumeFile);
         user.profile.resume = uploadRes.public_id;
+        user.profile.resumeUrl = uploadRes.secure_url;
         user.profile.resumeOriginalName = resumeFile.originalname;
       } catch (uploadError) {
         console.error("Resume upload failed:", uploadError.message);

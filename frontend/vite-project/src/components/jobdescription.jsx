@@ -48,7 +48,12 @@ const JobDescription = () => {
       return;
     }
 
-    if (!user.profile?.resume && !user.profile?.resumeDownloadUrl) {
+    if (
+      !user.profile?.resume &&
+      !user.profile?.resumeUrl &&
+      !user.profile?.resumeViewUrl &&
+      !user.profile?.resumeDownloadUrl
+    ) {
       toast.error("Please upload your resume before applying");
       navigate("/profile");
       return;

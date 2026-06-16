@@ -48,18 +48,9 @@ const Jobs = () => {
   const [filteredJobs, setFilteredJobs] = useState([]);
 
   useEffect(() => {
-    if (searchedQuery?.trim()) {
-      const filtered = allJobs.filter(
-        (job) =>
-          job.title?.toLowerCase().includes(searchedQuery.toLowerCase()) ||
-          job.description?.toLowerCase().includes(searchedQuery.toLowerCase()) ||
-          job.location?.toLowerCase().includes(searchedQuery.toLowerCase())
-      );
-      setFilteredJobs(filtered);
-    } else {
-      setFilteredJobs(allJobs);
-    }
-  }, [allJobs, searchedQuery]);
+    // Simply use the jobs from backend - no need for frontend filtering
+    setFilteredJobs(allJobs);
+  }, [allJobs]);
 
   return (
     <motion.div

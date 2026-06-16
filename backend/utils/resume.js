@@ -1,25 +1,29 @@
 import cloudinary from "./cloudinary.js";
 
+const getCloudName = () => process.env.CLOUDINARY_CLOUD_NAME || process.env.CLOUD_NAME;
+
 export const attachResumeDownloadUrl = (user) => {
   try {
-    const cloudName =
-      process.env.CLOUDINARY_CLOUD_NAME || process.env.CLOUD_NAME;
+    const cloudName = getCloudName();
 
-    if (!user?.profile?.resume || !cloudName) {
+    if ((!user?.profile?.resume && !user?.profile?.resumeUrl) || !cloudName) {
       return user;
     }
 
-    const resumeDownloadUrl = cloudinary.url(user.profile.resume, {
-      resource_type: "raw",
-      secure: true,
-      attachment: user.profile.resumeOriginalName || "resume",
-    });
+    const resumeViewUrl =
+      user.profile.resumeUrl ||
+      cloudinary.url(user.profile.resume, {
+        resource_type: "raw",
+        secure: true,
+      });
 
     return {
       ...user,
       profile: {
         ...user.profile,
-        resumeDownloadUrl,
+        resumeViewUrl,
+        // Kept for existing frontend code; downloads now use the original filename client-side.
+        resumeDownloadUrl: resumeViewUrl,
       },
     };
   } catch (error) {

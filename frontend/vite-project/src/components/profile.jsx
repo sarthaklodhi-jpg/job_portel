@@ -10,6 +10,7 @@ import UpdateProfileDialog from "./updateprofiledialog.jsx";
 import { useSelector } from "react-redux";
 import useGetAppliedJobs from "../hook/usegetappliedjob.jsx";
 import { motion } from "framer-motion";
+import { downloadResume, getResumeName, getResumeUrl, openResume } from "../utils/resume.js";
 
 const Profile = () => {
   useGetAppliedJobs();
@@ -23,8 +24,8 @@ const Profile = () => {
   const skills = user?.profile?.skills || [];
 
   // ✅ USE BACKEND-GENERATED DOWNLOAD URL
-  const resumeDownloadUrl = user?.profile?.resumeDownloadUrl || "";
-  const resumeName = user?.profile?.resumeOriginalName || "View Resume";
+  const resumeDownloadUrl = getResumeUrl(user?.profile);
+  const resumeName = getResumeName(user?.profile);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -131,20 +132,13 @@ const Profile = () => {
               <Button
                 size="sm"
                 variant="outline"
-                onClick={() => window.open(resumeDownloadUrl, "_blank")}
+                onClick={() => openResume(user?.profile)}
               >
                 Open
               </Button>
               <Button
                 size="sm"
-                onClick={() => {
-                  const link = document.createElement("a");
-                  link.href = resumeDownloadUrl;
-                  link.download = resumeName;
-                  document.body.appendChild(link);
-                  link.click();
-                  document.body.removeChild(link);
-                }}
+                onClick={() => downloadResume(user?.profile)}
               >
                 Download
               </Button>

@@ -51,6 +51,7 @@ const userSchema = new mongoose.Schema({
     linkedin: String,
     portfolio: String,
     resume: String,
+    resumeUrl: String,
     resumeOriginalName: String,
     company: {
       type: mongoose.Schema.Types.ObjectId,

@@ -74,7 +74,7 @@ const StudentDashboard = () => {
         <StatCard label="Latest Jobs" value={latestJobs.length} />
       </div>
 
-      {!user.profile?.resumeDownloadUrl && (
+      {!user.profile?.resumeDownloadUrl && !user.profile?.resumeViewUrl && !user.profile?.resumeUrl && (
         <div className="mb-8 rounded-xl border border-amber-200 bg-amber-50 p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h2 className="font-semibold text-amber-900">Resume missing</h2>
