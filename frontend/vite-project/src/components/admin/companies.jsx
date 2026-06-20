@@ -22,14 +22,14 @@ const Companies = () => {
   }, [input, dispatch]);
 
   return (
-    <>
+    <div className="app-bg">
       <Navbar />
 
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, ease: "easeOut" }}
-        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10"
+        className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8"
       >
         {/* Page Header */}
         <div className="mb-8">
@@ -39,10 +39,10 @@ const Companies = () => {
             </div>
 
             <div>
-              <h1 className="text-2xl sm:text-3xl font-semibold text-gray-900">
+              <h1 className="text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">
                 Companies
               </h1>
-              <p className="text-sm text-gray-500 mt-1">
+              <p className="mt-1 text-sm text-slate-500">
                 Manage companies registered on your platform.
               </p>
             </div>
@@ -72,11 +72,11 @@ const Companies = () => {
         </div>
 
         {/* Table Container */}
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
+        <div className="premium-card overflow-hidden">
           <Companiestable />
         </div>
       </motion.div>
-    </>
+    </div>
   );
 };
 

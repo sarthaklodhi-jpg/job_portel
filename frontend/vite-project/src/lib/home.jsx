@@ -8,7 +8,6 @@ import Footer from '@/components/shared/footer.jsx'
 import useGetAllJobs from '../hook/usegetalljobs.jsx'
 import { useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
-import Companies from '../components/admin/companies.jsx'
 
 
 const Home = () => {

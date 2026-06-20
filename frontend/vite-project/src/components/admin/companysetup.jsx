@@ -86,7 +86,7 @@ const CompanySetup = () => {
   }, [singleCompany]);
 
   return (
-    <>
+    <div className="app-bg">
       <Navbar />
 
       <motion.div
@@ -106,7 +106,7 @@ const CompanySetup = () => {
         </Button>
 
         {/* Card */}
-        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-8">
+        <div className="premium-card p-8">
           {/* Header */}
           <div className="flex items-start gap-4 mb-8">
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gray-100">
@@ -114,10 +114,10 @@ const CompanySetup = () => {
             </div>
 
             <div>
-              <h1 className="text-2xl font-semibold text-gray-900">
+              <h1 className="text-2xl font-bold tracking-tight text-slate-950">
                 Company Settings
               </h1>
-              <p className="text-sm text-gray-500 mt-1 max-w-md">
+              <p className="mt-1 max-w-md text-sm text-slate-500">
                 Update your company information. These details will be visible
                 across the platform.
               </p>
@@ -194,7 +194,7 @@ const CompanySetup = () => {
           </form>
         </div>
       </motion.div>
-    </>
+    </div>
   );
 };
 

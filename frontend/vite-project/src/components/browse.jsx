@@ -58,22 +58,22 @@ const Browse = () => {
       variants={pageVariant}
       initial="hidden"
       animate="visible"
-      className="min-h-screen bg-gray-50"
+      className="app-bg"
     >
       {/* Navbar */}
       <Navbar />
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto my-10 px-4">
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         {/* Heading */}
         <motion.h1
           variants={headingVariant}
           initial="hidden"
           animate="visible"
-          className="text-3xl font-bold mb-6 text-gray-800"
+          className="mb-6 text-3xl font-bold tracking-tight text-slate-950"
         >
           Search Results{" "}
-          <span className="text-[#6A38C2]">({allJobs.length})</span>
+          <span className="text-sky-600">({allJobs.length})</span>
         </motion.h1>
 
         {/* Results */}
@@ -84,7 +84,7 @@ const Browse = () => {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0 }}
-              className="flex items-center justify-center text-gray-500 text-lg font-medium h-[50vh]"
+              className="premium-card flex min-h-[360px] items-center justify-center text-lg font-medium text-slate-500"
             >
               No jobs found.
             </motion.div>
@@ -94,7 +94,7 @@ const Browse = () => {
               variants={containerVariant}
               initial="hidden"
               animate="visible"
-              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+              className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3"
             >
               {allJobs.map((job) => (
                 <motion.div

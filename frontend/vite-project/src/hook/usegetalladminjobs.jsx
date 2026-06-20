@@ -1,14 +1,16 @@
 import { useEffect } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
-
 import { JOB_API_END_POINT } from "../utils/constant.js";
-import { setAllAdminJobs } from "../redux/jobslice.js"
+import { setAllAdminJobs } from "../redux/jobslice.js";
+import { setUser } from "../redux/authslice.js";
 
 const useGetAllAdminJobs = () => {
   const dispatch = useDispatch();
+  const { user } = useSelector((store) => store.auth);
 
   useEffect(() => {
+    if (!user || user.role !== "recruiter" || !user.isProfileComplete) return;
 
     const fetchAllJobs = async () => {
       try {
@@ -16,18 +18,20 @@ const useGetAllAdminJobs = () => {
           withCredentials: true,
         });
 
-        console.log("API Response:", res.data); 
-
         if (res.data.success) {
           dispatch(setAllAdminJobs(res.data.jobs));
         }
       } catch (error) {
-        console.error("Error fetching jobs:", error);
+        if (error?.response?.status === 401) {
+          dispatch(setUser(null));
+        } else {
+          console.error("Error fetching admin jobs:", error);
+        }
       }
     };
 
     fetchAllJobs();
-  }, [dispatch]);
+  }, [dispatch, user]);
 };
 
 export default useGetAllAdminJobs;

@@ -1,0 +1,304 @@
+Phase 1 analysis is complete. I have not modified any files.
+
+**1. Folder Structure**
+- `backend/`: Express API, MongoDB models, controllers, routes, middleware, utilities.
+- `backend/controllers/`: auth/user, Google auth, jobs, companies, applications.
+- `backend/models/`: `User`, `Job`, `Company`, `Application`.
+- `backend/routes/`: user, job, company, application API routers.
+- `backend/middlewares/`: JWT auth, multer upload, validation, async/error handling.
+- `backend/utils/`: DB connection, Cloudinary config, DataURI conversion, resume download URL helpers.
+- `frontend/vite-project/`: React + Vite app.
+- `frontend/vite-project/src/components/`: pages, dashboard views, reusable UI, admin/recruiter/student components.
+- `frontend/vite-project/src/redux/`: Redux Toolkit slices and persisted store.
+- `frontend/vite-project/src/hook/`: data-fetching hooks.
+- `frontend/vite-project/src/utils/`: API constants and resume helpers.
+
+**2. Authentication Flow**
+- Local signup/login lives in `backend/controllers/user.controller.js`.
+- Google login lives in `backend/controllers/google.authcontroller.js`.
+- Login creates a JWT using `SECRET_KEY`.
+- JWT is stored in an HTTP-only cookie named `token`.
+- `isAuthenticated` reads the cookie, verifies JWT, and sets `req.id = decoded.userId`.
+- Frontend stores the returned user in Redux `auth.user`, persisted via `redux-persist`.
+- Protected frontend routes use `components/admin/protectedroute.jsx`.
+
+**3. User Model**
+`User` contains:
+- `fullname`, `email`, `phoneNumber`, `password`, `role`
+- `authProvider`, `googleId`, `isProfileComplete`
+- `profile` object with:
+  - `bio`, `skills`
+  - links: `github`, `linkedin`, `portfolio`
+  - resume fields: `resume`, `resumeUrl`, `resumeOriginalName`
+  - recruiter/company fields
+  - `profilePhoto`
+
+Resume data is already stored under `user.profile`, so the AI feature can read from there without changing the model.
+
+**4. Job Model**
+`Job` contains:
+- `title`
+- `description`
+- `requirements`
+- `salary`
+- `experienceLevel`
+- `location`
+- `jobType`
+- `position`
+- `company`
+- `created_by`
+- `applications`
+
+There is no `skills` or `industry` field currently, so matching should use existing fields and conditionally include optional fields only if present.
+
+**5. Resume Upload Flow**
+Resume upload happens during:
+- register
+- complete profile
+- profile update
+
+Flow:
+- Multer memory storage receives file.
+- File is converted to DataURI.
+- Uploaded to Cloudinary as `resource_type: "raw"`.
+- User profile stores:
+  - `profile.resume` as Cloudinary `public_id`
+  - `profile.resumeUrl` as Cloudinary secure URL
+  - `profile.resumeOriginalName`
+
+Important: multer currently allows PDF, DOC, and DOCX resumes. The requested AI flow specifically says extract PDF text using `pdf-parse`, so non-PDF resumes should return a clean “PDF parsing failed / unsupported resume format” style error instead of crashing.
+
+**6. Cloudinary Integration**
+- Config is in `backend/utils/cloudinary.js`.
+- Supports both:
+  - `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`
+  - fallback names `CLOUD_NAME`, `API_KEY`, `API_SECRET`
+- Resume download helper is in `backend/utils/resume.js`.
+- Resume download proxy route exists at:
+  - `GET /api/v1/users/resume/download`
+
+**7. Existing Middleware**
+- `isAuthenticated.js`: JWT cookie auth, sets `req.id`.
+- `multer.js`: memory upload, file-size limit, image/resume validation.
+- `validateProfileUpdate.js`: validates email/name/phone/bio/skills payload.
+- `asyncHandler.js`: wraps async controllers.
+- `errorHandler.js`: centralized `ApiError`, `notFound`, multer/validation/duplicate/server errors.
+
+**8. Existing Routes**
+Backend currently registers:
+- `/api/v1/users`
+- `/api/v1/company`
+- `/api/v1/job`
+- `/api/v1/application`
+
+User routes:
+- `POST /register`
+- `POST /login`
+- `POST /google`
+- `GET /logout`
+- `POST /profile/update`
+- `POST /complete-profile`
+- `GET /resume/download`
+
+Job routes:
+- `POST /post`
+- `GET /gets`
+- `GET /getadminjobs`
+- `GET /get/:id`
+- `DELETE /delete/:id`
+
+Application routes:
+- `POST /apply/:id`
+- `GET /get`
+- `GET /:id/applicants`
+- `POST /status/:id/update`
+
+Company routes:
+- `POST /register`
+- `GET /get`
+- `GET /get/:id`
+- `PUT /update/:id`
+- `DELETE /delete/:id`
+
+**9. Current Profile API**
+There is no separate `GET /profile` endpoint. Profile data comes from login/signup/complete-profile/profile-update responses and is persisted in Redux.
+
+Profile update uses:
+- `POST /api/v1/users/profile/update`
+- authenticated
+- multipart form data
+- can update user fields, skills, profile photo, company logo, resume
+
+**10. Current Job APIs**
+- Public job listing: `GET /api/v1/job/gets?keyword=...`
+- Single job: `GET /api/v1/job/get/:id`, authenticated
+- Recruiter jobs: `GET /api/v1/job/getadminjobs`, authenticated
+- Post job: `POST /api/v1/job/post`, authenticated
+- Delete job: `DELETE /api/v1/job/delete/:id`, authenticated
+
+Existing search only matches `title` and `description`.
+
+**11. Redux Architecture**
+- Store uses Redux Toolkit.
+- Root reducer combines:
+  - `auth`
+  - `job`
+  - `company`
+  - `application`
+- `redux-persist` persists the root reducer.
+- `auth` also has its own persist config with `loading` blacklisted.
+- `authslice` stores `loading` and `user`.
+- `jobslice` stores all jobs, admin jobs, single job, applied jobs, and search terms.
+- The AI resume feature does not need Redux. Local component state is better because scan results are request-specific and should not alter existing global job state.
+
+**12. Frontend Routing**
+Routes are defined in `src/App.jsx`.
+
+Student:
+- `/student/dashboard`
+- `/jobs`
+- `/description/:id`
+- `/browse`
+- `/profile`
+
+Recruiter/admin:
+- `/recruiter/dashboard`
+- `/recruiter/profile`
+- `/admin/companies`
+- `/admin/companies/create`
+- `/admin/companies/:id`
+- `/admin/jobs`
+- `/admin/jobs/create`
+- `/admin/jobs/:id/applicants`
+
+**13. Profile Page**
+`components/profile.jsx` shows:
+- Navbar
+- user avatar/name/bio
+- email/phone
+- skills
+- resume link/download
+- applied jobs table
+- update profile dialog
+
+This is the best frontend location for the new `ResumeScreening.jsx` card because the user is already viewing resume data there.
+
+**14. Dashboard Pages**
+- `studentdashboard.jsx`: student stats, profile completion, latest jobs, resume missing warning.
+- `recruiterdashboard.jsx`: company/job/applicant stats and recruiter management shortcuts.
+- Recruiter/admin pages are isolated behind role checks.
+
+The AI scanner should not be added to recruiter dashboard or admin pages.
+
+**15. Existing Reusable UI Components**
+Reusable components include:
+- `Button`
+- `Badge`
+- `Input`
+- `Label`
+- `Dialog`
+- `Avatar`
+- `Table`
+- `Textarea`
+- `Select`
+- `RadioGroup`
+- `Popover`
+- `Carousel`
+- `Sonner` toaster
+- `Job` card
+- `LatestJobCards`
+- dashboard primitives: `PageShell`, `GradientHero`, `SectionCard`, `StatCard`, `EmptyState`, `SkeletonGrid`
+
+For recommended jobs, the existing `Job` component is usable.
+
+**Best Integration Point**
+Backend:
+- Add isolated files:
+  - `backend/controllers/resume.controller.js`
+  - `backend/routes/resume.routes.js`
+  - `backend/utils/aiClient.js`
+  - optionally `backend/services/resumeAnalysis.service.js`
+- Register only one new route in `backend/index.js`:
+  - `app.use("/api/v1/resume", resumeRoutes)`
+- Use existing `isAuthenticated`.
+
+Frontend:
+- Add `frontend/vite-project/src/components/ResumeScreening.jsx`.
+- Add one endpoint constant, likely:
+  - `RESUME_API_END_POINT = ${BASE_URL}/api/v1/resume`
+- Render `ResumeScreening` inside `components/profile.jsx`, near the existing resume section.
+
+This keeps the feature isolated: no changes to auth, upload, download, existing job APIs, existing profile APIs, recruiter flow, or admin flow.
+
+Ready for implementation when you want me to proceed.
+
+Implemented the isolated AI Resume Screening feature.
+
+**Files Created**
+- [backend/utils/aiClient.js](C:/Users/HP/job_portel/backend/utils/aiClient.js)
+- [backend/services/resumeAnalysis.service.js](C:/Users/HP/job_portel/backend/services/resumeAnalysis.service.js)
+- [backend/controllers/resume.controller.js](C:/Users/HP/job_portel/backend/controllers/resume.controller.js)
+- [backend/routes/resume.routes.js](C:/Users/HP/job_portel/backend/routes/resume.routes.js)
+- [frontend/vite-project/src/components/ResumeScreening.jsx](C:/Users/HP/job_portel/frontend/vite-project/src/components/ResumeScreening.jsx)
+
+**Files Modified**
+- [backend/index.js](C:/Users/HP/job_portel/backend/index.js): registered `app.use("/api/v1/resume", resumeRoutes)`.
+- [frontend/vite-project/src/utils/constant.js](C:/Users/HP/job_portel/frontend/vite-project/src/utils/constant.js): added `RESUME_API_END_POINT`.
+- [frontend/vite-project/src/components/profile.jsx](C:/Users/HP/job_portel/frontend/vite-project/src/components/profile.jsx): rendered the new `ResumeScreening` card on the student profile page and removed one unused import that was failing lint.
+
+There are other pre-existing uncommitted files in the repo; I did not revert or refactor them.
+
+**What Changed**
+- Added `POST /api/v1/resume/screen`.
+- Uses existing `isAuthenticated` middleware and `req.id`.
+- Fetches the logged-in user, reads `user.profile.resumeUrl` or Cloudinary `resume` public id.
+- Downloads the resume PDF safely with size/type checks.
+- Extracts PDF text using `pdf-parse`.
+- Sends resume text to Gemini via `@google/genai`, using `process.env.GEMINI_API_KEY`.
+- Safely parses Gemini JSON, normalizes the response, and clamps `resumeScore` to `0-100`.
+- Recommends jobs from MongoDB by matching AI skills/keywords against current `Job` fields: `title`, `description`, `requirements`; `skills` and `industry` are included only if the schema later defines them.
+- Frontend card supports loading state, retry, toasts, progress bar, badges, analysis sections, and recommended jobs using the existing `Job` card.
+
+**Verification**
+- `node --check backend/services/resumeAnalysis.service.js` passed.
+- Backend resume service import passed.
+- `npm.cmd run lint` in `frontend/vite-project` passed.
+- `npm.cmd run build` in `frontend/vite-project` passed.
+- Full backend import attempted DB connection and failed because `MONGO_URI` is not set in this shell. That is environment-related; the new modules import cleanly.
+
+**How To Test**
+1. Ensure backend env includes:
+   - `MONGO_URI`
+   - `SECRET_KEY`
+   - `GEMINI_API_KEY`
+   - Cloudinary env vars already used by the project
+2. Start backend:
+   ```bash
+   cd backend
+   npm run dev
+   ```
+3. Start frontend:
+   ```bash
+   cd frontend/vite-project
+   npm run dev
+   ```
+4. Log in as a student with a PDF resume uploaded.
+5. Open `/profile`.
+6. Click `Scan Resume`.
+7. Confirm score, skills, strengths, weaknesses, tips, and recommended jobs render.
+
+**Example API Response**
+```json
+{
+  "success": true,
+  "analysis": {
+    "resumeScore": 82,
+    "skills": ["React", "Node.js", "MongoDB"],
+    "strengths": ["Strong full-stack project experience"],
+    "weaknesses": ["Limited quantified achievements"],
+    "improvementTips": ["Add measurable project impact"],
+    "suggestedRoleKeywords": ["Frontend Developer", "MERN Stack Developer"]
+  },
+  "recommendedJobs": []
+}
+```

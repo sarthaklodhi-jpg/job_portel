@@ -31,7 +31,7 @@ const CategoryCarousel = () => {
   };
 
   return (
-    <section className="w-full py-10 bg-white">
+    <section className="w-full border-y border-slate-200/70 bg-white py-8">
       <div className="max-w-6xl mx-auto px-4">
         <Carousel
           opts={{ align: "start", loop: true }}
@@ -46,9 +46,7 @@ const CategoryCarousel = () => {
                 <Button
                   onClick={() => searchJobHandler(cat)}
                   variant="outline"
-                  className="rounded-full border-2 border-[#6A38C2] text-[#6A38C2]
-                  hover:bg-[#6A38C2] hover:text-white transition-all duration-300
-                  shadow-sm px-5 py-2 w-full max-w-[200px]"
+                  className="w-full max-w-[210px] rounded-full border-slate-200 bg-white px-5 py-2 text-slate-700 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-sky-200 hover:bg-sky-50 hover:text-sky-700"
                 >
                   {cat}
                 </Button>
@@ -56,8 +54,8 @@ const CategoryCarousel = () => {
             ))}
           </CarouselContent>
 
-          <CarouselPrevious className="absolute -left-3 top-1/2 -translate-y-1/2 bg-white shadow-md hover:bg-gray-50 rounded-full border" />
-          <CarouselNext className="absolute -right-3 top-1/2 -translate-y-1/2 bg-white shadow-md hover:bg-gray-50 rounded-full border" />
+          <CarouselPrevious className="absolute -left-3 top-1/2 -translate-y-1/2 rounded-full border-slate-200 bg-white shadow-md hover:bg-slate-50" />
+          <CarouselNext className="absolute -right-3 top-1/2 -translate-y-1/2 rounded-full border-slate-200 bg-white shadow-md hover:bg-slate-50" />
         </Carousel>
       </div>
     </section>

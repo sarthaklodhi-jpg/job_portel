@@ -86,14 +86,14 @@ const UpdateProfileDialog = ({ open, setOpen }) => {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="sm:max-w-[480px] rounded-2xl p-0">
+      <DialogContent className="sm:max-w-[520px] rounded-2xl border-slate-200 p-0 shadow-[0_28px_80px_rgba(15,23,42,0.22)]">
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
         >
-          <DialogHeader className="px-6 pt-6 pb-4 border-b">
-            <DialogTitle>Update Profile</DialogTitle>
-            <DialogDescription>
+          <DialogHeader className="border-b border-slate-200 px-6 pb-4 pt-6">
+            <DialogTitle className="text-xl font-bold tracking-tight text-slate-950">Update Profile</DialogTitle>
+            <DialogDescription className="text-slate-500">
               Update your personal information
             </DialogDescription>
           </DialogHeader>
@@ -103,7 +103,7 @@ const UpdateProfileDialog = ({ open, setOpen }) => {
             <div className="flex items-center gap-4">
               <img
                 src={user?.profile?.profilePhoto || "/avatar.png"}
-                className="w-20 h-20 rounded-full object-cover border"
+                className="h-20 w-20 rounded-2xl border object-cover shadow-sm"
               />
               <Input type="file" accept="image/*" onChange={profilePhotoHandler} />
             </div>

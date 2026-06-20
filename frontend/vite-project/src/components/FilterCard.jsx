@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useDispatch } from "react-redux";
 import { setSearchedQuery } from "@/redux/jobslice";
 
@@ -23,12 +24,7 @@ const FilterCard = () => {
   const dispatch = useDispatch();
 
   const changeHandler = (value) => {
-    // Toggle: if clicking the same filter, deselect it
-    if (selectedValue === value) {
-      setSelectedValue('');
-    } else {
-      setSelectedValue(value);
-    }
+    setSelectedValue(value);
   };
 
   useEffect(() =>{
@@ -37,37 +33,31 @@ const FilterCard = () => {
   }, [selectedValue, dispatch]);
 
   return (
-    <div className="p-5 bg-white border border-gray-200 rounded-lg shadow-sm">
-      <h1 className="text-xl font-bold mb-4">Filter Jobs</h1>
-      <hr className="mb-4" />
+    <div className="premium-card p-5">
+      <h1 className="text-xl font-bold tracking-tight text-slate-950">Filter Jobs</h1>
+      <p className="mt-1 text-sm text-slate-500">Refine your search results.</p>
+      <hr className="my-5 border-slate-200" />
 
       {/* Filter sections */}
       <div className="space-y-6">
         {filterData.map((data, index) => (
           <div key={index}>
-            <h2 className="font-semibold text-lg mb-2 text-[#6A38C2]">
+            <h2 className="mb-3 text-sm font-bold uppercase tracking-wide text-slate-500">
               {data.filterType}
             </h2>
-            <div>
+            <RadioGroup value = {selectedValue} onValueChange={changeHandler} >
               {data.array.map((item, idx) => (
                 <div
                   key={idx}
-                  className="flex items-center space-x-2 mb-2 cursor-pointer"
-                  onClick={() => changeHandler(item)}
+                  className="mb-2 flex cursor-pointer items-center space-x-2 rounded-xl px-2 py-2 transition hover:bg-slate-50"
                 >
-                  <input
-                    type="radio"
-                    id={`${data.filterType}-${idx}`}
-                    checked={selectedValue === item}
-                    onChange={() => {}}
-                    className="cursor-pointer"
-                  />
-                  <Label htmlFor={`${data.filterType}-${idx}`} className="text-gray-700 cursor-pointer">
+                  <RadioGroupItem value={item} id={`${data.filterType}-${idx}`} />
+                  <Label htmlFor={`${data.filterType}-${idx}`} className="cursor-pointer text-sm font-medium text-slate-700">
                     {item}
                   </Label>
                 </div>
               ))}
-            </div>
+            </RadioGroup>
           </div>
         ))}
       </div>

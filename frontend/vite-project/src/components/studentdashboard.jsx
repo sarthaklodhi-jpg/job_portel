@@ -75,7 +75,7 @@ const StudentDashboard = () => {
       </div>
 
       {!user.profile?.resumeDownloadUrl && !user.profile?.resumeViewUrl && !user.profile?.resumeUrl && (
-        <div className="mb-8 rounded-xl border border-amber-200 bg-amber-50 p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="mb-8 flex flex-col gap-4 rounded-2xl border border-amber-200 bg-amber-50 p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h2 className="font-semibold text-amber-900">Resume missing</h2>
             <p className="text-sm text-amber-800">
@@ -96,24 +96,24 @@ const StudentDashboard = () => {
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {latestJobs.map((job) => (
-              <div key={job._id} className="border rounded-xl p-5 shadow-sm bg-white">
-              <h2 className="font-semibold text-lg">{job.title}</h2>
-              <p className="text-sm text-gray-500 mt-1">
-                {job.location} | {job.jobType}
-              </p>
+              <div key={job._id} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-md">
+                <h2 className="text-lg font-semibold tracking-tight text-slate-950">{job.title}</h2>
+                <p className="mt-1 text-sm text-slate-500">
+                  {job.location} | {job.jobType}
+                </p>
 
-              <div className="mt-4 flex gap-3">
-                <Button size="sm" onClick={() => navigate(`/description/${job._id}`)}>
-                  View Details
-                </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => navigate(`/description/${job._id}`)}
-                >
-                  Apply
-                </Button>
-              </div>
+                <div className="mt-4 flex gap-3">
+                  <Button size="sm" onClick={() => navigate(`/description/${job._id}`)}>
+                    View Details
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => navigate(`/description/${job._id}`)}
+                  >
+                    Apply
+                  </Button>
+                </div>
               </div>
             ))}
           </div>

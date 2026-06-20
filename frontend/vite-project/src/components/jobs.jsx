@@ -48,34 +48,48 @@ const Jobs = () => {
   const [filteredJobs, setFilteredJobs] = useState([]);
 
   useEffect(() => {
-    // Simply use the jobs from backend - no need for frontend filtering
-    setFilteredJobs(allJobs);
-  }, [allJobs]);
+    if (searchedQuery?.trim()) {
+      const filtered = allJobs.filter(
+        (job) =>
+          job.title?.toLowerCase().includes(searchedQuery.toLowerCase()) ||
+          job.description?.toLowerCase().includes(searchedQuery.toLowerCase()) ||
+          job.location?.toLowerCase().includes(searchedQuery.toLowerCase())
+      );
+      setFilteredJobs(filtered);
+    } else {
+      setFilteredJobs(allJobs);
+    }
+  }, [allJobs, searchedQuery]);
 
   return (
     <motion.div
       variants={pageVariant}
       initial="hidden"
       animate="visible"
-      className="min-h-screen bg-gradient-to-b from-white via-[#f9f6ff] to-white"
+      className="app-bg"
     >
       <Navbar />
 
-      <div className="max-w-7xl mx-auto mt-10 px-4">
-        <div className="flex flex-col lg:flex-row gap-6">
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        <div className="mb-6">
+          <span className="eyebrow">Find roles</span>
+          <h1 className="mt-3 text-3xl font-bold tracking-tight text-slate-950">Browse Jobs</h1>
+          <p className="mt-2 text-slate-600">Filter openings by location, industry, salary, and your current search.</p>
+        </div>
+        <div className="flex flex-col gap-6 lg:flex-row">
           
           {/* Sidebar */}
           <motion.div
             variants={sidebarVariant}
             initial="hidden"
             animate="visible"
-            className="w-full lg:w-[25%]"
+            className="w-full lg:sticky lg:top-24 lg:w-[280px] lg:self-start"
           >
             <FilterCard />
           </motion.div>
 
           {/* Jobs */}
-          <div className="flex-1 h-[88vh] overflow-y-auto pb-5">
+          <div className="flex-1 pb-5 lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto lg:pr-1">
             <AnimatePresence mode="wait">
               {filteredJobs.length === 0 ? (
                 <motion.div
@@ -83,7 +97,7 @@ const Jobs = () => {
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0 }}
-                  className="flex items-center justify-center text-gray-500 text-lg font-medium h-full"
+                  className="premium-card flex min-h-[360px] items-center justify-center text-lg font-medium text-slate-500"
                 >
                   No Jobs Found
                 </motion.div>
@@ -93,7 +107,7 @@ const Jobs = () => {
                   variants={containerVariant}
                   initial="hidden"
                   animate="visible"
-                  className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+                  className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3"
                 >
                   {filteredJobs.map((job) => (
                     <motion.div

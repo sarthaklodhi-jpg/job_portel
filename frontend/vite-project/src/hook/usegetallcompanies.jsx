@@ -1,31 +1,37 @@
 import { useEffect } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
 import { setCompanies } from "../redux/companyslice.js";
 import { COMPANY_API_END_POINT } from "../utils/constant.js";
+import { setUser } from "../redux/authslice.js";
 
 const useGetAllCompanies = () => {
   const dispatch = useDispatch();
+  const { user } = useSelector((store) => store.auth);
 
   useEffect(() => {
-    const fetchComapanies = async () => {
+    if (!user || user.role !== "recruiter" || !user.isProfileComplete) return;
+
+    const fetchCompanies = async () => {
       try {
         const res = await axios.get(`${COMPANY_API_END_POINT}/get`, {
           withCredentials: true,
         });
 
-        console.log("API Response:", res.data); // 👈 add this for debugging
-
         if (res.data.success) {
           dispatch(setCompanies(res.data.companies));
         }
       } catch (error) {
-        console.error("Error fetching jobs:", error);
+        if (error?.response?.status === 401) {
+          dispatch(setUser(null));
+        } else {
+          console.error("Error fetching companies:", error);
+        }
       }
     };
 
-    fetchComapanies();
-  }, [dispatch]);
+    fetchCompanies();
+  }, [dispatch, user]);
 };
 
 export default useGetAllCompanies;

@@ -81,9 +81,9 @@ const RecruiterDashboard = () => {
         ) : (
           <div className="grid md:grid-cols-2 gap-4">
           {companies.map((company) => (
-            <div key={company._id} className="border rounded-xl p-4 bg-white">
-              <h3 className="font-medium">{company.name}</h3>
-              <p className="text-sm text-gray-500">{company.location || "Location not added"}</p>
+            <div key={company._id} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-1 hover:shadow-md">
+              <h3 className="font-semibold text-slate-950">{company.name}</h3>
+              <p className="text-sm text-slate-500">{company.location || "Location not added"}</p>
               <Button
                 size="sm"
                 className="mt-3"
@@ -103,10 +103,10 @@ const RecruiterDashboard = () => {
         ) : (
           <div className="grid md:grid-cols-2 gap-4">
           {jobs.map((job) => (
-            <div key={job._id} className="border rounded-xl p-4 bg-white">
-              <h3 className="font-medium">{job.title}</h3>
-              <p className="text-sm text-gray-500">{job.location}</p>
-              <p className="text-sm text-gray-500">
+            <div key={job._id} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-1 hover:shadow-md">
+              <h3 className="font-semibold text-slate-950">{job.title}</h3>
+              <p className="text-sm text-slate-500">{job.location}</p>
+              <p className="text-sm text-slate-500">
                 {job.applications?.length || 0} applicant(s)
               </p>
               <Button
@@ -128,9 +128,9 @@ const RecruiterDashboard = () => {
         ) : (
           <div className="grid md:grid-cols-2 gap-4">
           {recentJobsWithApplicants.map((job) => (
-            <div key={job._id} className="border rounded-xl p-4 bg-white">
-              <h3 className="font-medium">{job.title}</h3>
-              <p className="text-sm text-gray-500">
+            <div key={job._id} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-1 hover:shadow-md">
+              <h3 className="font-semibold text-slate-950">{job.title}</h3>
+              <p className="text-sm text-slate-500">
                 {job.applications.length} applicant(s)
               </p>
               <Button

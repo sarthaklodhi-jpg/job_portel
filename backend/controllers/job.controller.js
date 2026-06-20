@@ -79,6 +79,9 @@ export const getAllJobs = async (req, res) => {
     const keyword = req.query.keyword || "";
 
     // ✅ Create a MongoDB search filter (query)
+    // The `$or` operator means: match documents where
+    // EITHER the title OR the description contains the keyword.
+    // `$regex` allows partial matches like SQL's "LIKE" — case-insensitive using `$options: 'i'`.
     const query = {
       $or: [
         { title: { $regex: keyword, $options: "i" } },
@@ -86,47 +89,10 @@ export const getAllJobs = async (req, res) => {
       ],
     };
 
-    // Handle location filter
-    if (keyword === "Delhi NCR") {
-      query.$or = [
-        { location: { $regex: "delhi", $options: "i" } },
-        { location: { $regex: "ncr", $options: "i" } },
-      ];
-    } else if (keyword === "Bangalore") {
-      query.$or = [{ location: { $regex: "bangalore", $options: "i" } }];
-    } else if (keyword === "Hyderabad") {
-      query.$or = [{ location: { $regex: "hyderabad", $options: "i" } }];
-    } else if (keyword === "Pune") {
-      query.$or = [{ location: { $regex: "pune", $options: "i" } }];
-    } else if (keyword === "Mumbai") {
-      query.$or = [{ location: { $regex: "mumbai", $options: "i" } }];
-    }
-
-    // Handle salary range filter
-    if (keyword === "0 - 40k") {
-      query.$or = undefined;
-      query.salary = { $gte: 0, $lte: 40000 };
-    } else if (keyword === "40k - 1 Lakh") {
-      query.$or = undefined;
-      query.salary = { $gt: 40000, $lte: 100000 };
-    } else if (keyword === "1 Lakh - 5 Lakh") {
-      query.$or = undefined;
-      query.salary = { $gt: 100000, $lte: 500000 };
-    }
-
-    // Handle industry/role filter
-    if (keyword === "Frontend Developer") {
-      query.$or = [{ title: { $regex: "frontend", $options: "i" } }];
-    } else if (keyword === "Backend Developer") {
-      query.$or = [{ title: { $regex: "backend", $options: "i" } }];
-    } else if (keyword === "Full Stack Developer") {
-      query.$or = [
-        { title: { $regex: "full stack", $options: "i" } },
-        { title: { $regex: "fullstack", $options: "i" } },
-      ];
-    }
-
     // ✅ Fetch jobs from DB
+    // 1. `.find(query)` — get all jobs matching the filter
+    // 2. `.populate("company")` — replace company ObjectId with full company document
+    // 3. `.sort({ createdAt: -1 })` — sort newest jobs first
     const jobs = await Job.find(query)
       .populate({
         path: "company"

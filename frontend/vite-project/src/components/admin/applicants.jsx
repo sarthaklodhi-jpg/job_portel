@@ -37,7 +37,7 @@ const Applicants = () => {
   }, [params.id, dispatch]);
 
   return (
-    <>
+    <div className="app-bg">
       <Navbar />
 
       <motion.div
@@ -54,12 +54,12 @@ const Applicants = () => {
             </div>
 
             <div>
-              <h1 className="text-2xl font-semibold text-gray-900">
+              <h1 className="text-2xl font-bold tracking-tight text-slate-950">
                 Applicants
               </h1>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-slate-500">
                 Total applications received:{" "}
-                <span className="font-medium text-gray-700">
+                <span className="font-semibold text-slate-700">
                   {applications.length}
                 </span>
               </p>
@@ -68,11 +68,11 @@ const Applicants = () => {
         </div>
 
         {/* Table Container */}
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
+        <div className="premium-card overflow-hidden">
           <Applicantstable />
         </div>
       </motion.div>
-    </>
+    </div>
   );
 };
 

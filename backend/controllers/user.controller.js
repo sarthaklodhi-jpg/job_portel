@@ -127,7 +127,8 @@ export const register = async (req, res) => {
       profile: newUser.profile,
     };
 
-    userData = attachResumeDownloadUrl(userData);
+    const baseUrl = `${req.protocol}://${req.get("host")}`;
+    userData = attachResumeDownloadUrl(userData, baseUrl);
 
     return res.status(201).json({
       success: true,
@@ -223,7 +224,8 @@ export const login = async (req, res) => {
       profile: user.profile,
     };
 
-    userData = attachResumeDownloadUrl(userData);
+    const baseUrl = `${req.protocol}://${req.get("host")}`;
+    userData = attachResumeDownloadUrl(userData, baseUrl);
 
     return res
       .status(200)
@@ -383,7 +385,8 @@ export const updateProfile = asyncHandler(async (req, res) => {
     await user.save();
     user.password = undefined;
 
-    const updatedUser = attachResumeDownloadUrl(user.toObject());
+    const baseUrl = `${req.protocol}://${req.get("host")}`;
+    const updatedUser = attachResumeDownloadUrl(user.toObject(), baseUrl);
 
     return res.status(200).json({
       success: true,
@@ -465,7 +468,8 @@ export const completeProfile = async (req, res) => {
 
     user.password = undefined;
 
-    const updatedUser = attachResumeDownloadUrl(user.toObject());
+    const baseUrl = `${req.protocol}://${req.get("host")}`;
+    const updatedUser = attachResumeDownloadUrl(user.toObject(), baseUrl);
 
     return res.status(200).json({
       success: true,

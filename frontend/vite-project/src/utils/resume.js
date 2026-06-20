@@ -1,5 +1,21 @@
-export const getResumeUrl = (profile) =>
-  profile?.resumeViewUrl || profile?.resumeDownloadUrl || profile?.resumeUrl || "";
+const normalizeResumeUrl = (url) => {
+  if (!url) return "";
+  return url.replace("/api/users/", "/api/v1/users/");
+};
+
+export const getResumeUrl = (profile) => {
+  // Prefer a view URL for opening in a new tab, then fall back to direct
+  // secure URL or download URL.
+  const url = profile?.resumeViewUrl || profile?.resumeUrl || profile?.resumeDownloadUrl || "";
+  return normalizeResumeUrl(url);
+};
+
+export const getResumeDownloadUrl = (profile) => {
+  // Prefer a dedicated download URL that sets content-disposition, then
+  // fall back to other available URLs.
+  const url = profile?.resumeDownloadUrl || profile?.resumeUrl || profile?.resumeViewUrl || "";
+  return normalizeResumeUrl(url);
+};
 
 export const getResumeName = (profile) => {
   const originalName = profile?.resumeOriginalName || "resume.pdf";
@@ -13,7 +29,7 @@ export const openResume = (profile) => {
 };
 
 export const downloadResume = async (profile) => {
-  const url = getResumeUrl(profile);
+  const url = getResumeDownloadUrl(profile);
   if (!url) return;
 
   const filename = getResumeName(profile);

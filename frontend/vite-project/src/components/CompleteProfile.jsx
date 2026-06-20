@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { RadioGroup } from "@/components/ui/radio-group";
 import axios from "axios";
 import { USER_API_END_POINT } from "@/utils/constant";
 import { toast } from "sonner";
@@ -63,100 +62,68 @@ const CompleteProfile = () => {
     }
 
     try {
-      const res = await axios.post(
-        `${USER_API_END_POINT}/complete-profile`,
-        formData,
-        { withCredentials: true }
-      );
+      const res = await axios.post(`${USER_API_END_POINT}/complete-profile`, formData, {
+        withCredentials: true,
+      });
 
       if (res.data.success) {
         dispatch(setUser(res.data.user));
         toast.success("Profile completed successfully");
-
-        // ✅ ROLE-BASED REDIRECT
-      navigate(res.data.user?.role === "recruiter" ? "/admin/companies" : "/jobs");
-
+        navigate(res.data.user?.role === "recruiter" ? "/admin/companies" : "/jobs");
       }
     } catch (error) {
-      toast.error(
-        error.response?.data?.message || "Failed to complete profile"
-      );
+      toast.error(error.response?.data?.message || "Failed to complete profile");
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-white via-[#f9f6ff] to-white px-4">
-      <form
-        onSubmit={submitHandler}
-        className="bg-white w-full max-w-[440px] p-8 rounded-2xl shadow-xl border"
-      >
-        <h2 className="text-3xl font-extrabold text-center text-[#F83802] mb-6">
-          Complete Profile ✨
-        </h2>
+    <div className="app-bg flex items-center justify-center px-4 py-16">
+      <form onSubmit={submitHandler} className="premium-card w-full max-w-[460px] p-8">
+        <div className="mb-8 text-center">
+          <span className="eyebrow mx-auto">Final step</span>
+          <h2 className="mt-4 text-3xl font-extrabold tracking-tight text-slate-950">
+            Complete Profile
+          </h2>
+          <p className="mt-2 text-sm text-slate-500">
+            Add the essentials so your workspace is ready.
+          </p>
+        </div>
 
-        {/* Phone */}
         <div className="mb-4">
           <Label>Phone Number</Label>
-          <Input
-            name="phoneNumber"
-            value={input.phoneNumber}
-            onChange={changeHandler}
-          />
+          <Input name="phoneNumber" value={input.phoneNumber} onChange={changeHandler} />
         </div>
 
-        {/* Password */}
         <div className="mb-4">
           <Label>Password</Label>
-          <Input
-            type="password"
-            name="password"
-            value={input.password}
-            onChange={changeHandler}
-          />
+          <Input type="password" name="password" value={input.password} onChange={changeHandler} />
         </div>
 
-        {/* Confirm Password */}
         <div className="mb-4">
           <Label>Confirm Password</Label>
-          <Input
-            type="password"
-            name="confirmPassword"
-            value={input.confirmPassword}
-            onChange={changeHandler}
-          />
+          <Input type="password" name="confirmPassword" value={input.confirmPassword} onChange={changeHandler} />
         </div>
 
-        {/* Role */}
         <div className="mb-6">
           <Label className="mb-2 block">Continue as</Label>
-          <RadioGroup className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-4">
             {["student", "recruiter"].map((r) => (
-              <label
+              <button
+                type="button"
                 key={r}
-                className={`border rounded-xl p-3 text-center cursor-pointer
-                  ${
-                    input.role === r
-                      ? "border-[#F83802] bg-[#F83802]/5 text-[#F83802]"
-                      : "border-gray-200 hover:bg-gray-50"
-                  }`}
+                onClick={() => setInput((prev) => ({ ...prev, role: r }))}
+                className={`cursor-pointer rounded-xl border p-3 text-center transition ${
+                  input.role === r
+                    ? "border-sky-300 bg-sky-50 text-sky-700 shadow-sm"
+                    : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+                }`}
               >
-                <input
-                  type="radio"
-                  name="role"
-                  value={r}
-                  checked={input.role === r}
-                  onChange={(e) =>
-                    setInput({ ...input, role: e.target.value })
-                  }
-                  className="hidden"
-                />
-                <span className="capitalize font-medium">{r}</span>
-              </label>
+                <span className="font-semibold capitalize">{r}</span>
+              </button>
             ))}
-          </RadioGroup>
+          </div>
         </div>
 
-        {/* Profile Photo */}
         <div className="mb-6">
           <Label>Profile Photo (optional)</Label>
           <Input type="file" accept="image/*" onChange={fileHandler} />
@@ -167,17 +134,12 @@ const CompleteProfile = () => {
             <Label>Resume (PDF recommended)</Label>
             <Input type="file" accept=".pdf,.doc,.docx" onChange={resumeHandler} />
             {input.resume && (
-              <p className="text-xs text-gray-500 mt-2">
-                Selected: {input.resume.name}
-              </p>
+              <p className="mt-2 text-xs text-slate-500">Selected: {input.resume.name}</p>
             )}
           </div>
         )}
 
-        <Button
-          type="submit"
-          className="w-full bg-[#F83802] hover:bg-[#d52e00] text-white font-semibold py-3 rounded-xl"
-        >
+        <Button type="submit" className="w-full">
           Finish Setup
         </Button>
       </form>

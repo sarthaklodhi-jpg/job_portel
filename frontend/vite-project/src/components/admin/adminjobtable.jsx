@@ -20,7 +20,6 @@ import {
   Trash2,
 } from "lucide-react";
 import { useSelector } from "react-redux";
-import useGetAllAdminJobs from "@/hook/usegetalladminjobs.jsx";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
@@ -55,7 +54,6 @@ const CompanyAvatar = ({ name, logo }) => {
 /* ---------------- ADMIN JOBS TABLE ---------------- */
 
 const AdminJobsTable = () => {
-  useGetAllAdminJobs();
   const navigate = useNavigate();
   const dispatch = useDispatch();
 

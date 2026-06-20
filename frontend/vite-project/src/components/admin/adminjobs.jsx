@@ -24,7 +24,7 @@ const AdminJobs = () => {
   }, [input, dispatch]);
 
   return (
-    <>
+    <div className="app-bg">
       <Navbar />
 
       <motion.div
@@ -35,10 +35,10 @@ const AdminJobs = () => {
       >
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-2xl sm:text-3xl font-semibold text-gray-900">
+              <h1 className="text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">
             Manage Jobs
           </h1>
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="mt-1 text-sm text-slate-500">
             View, search, and manage all jobs you have posted.
           </p>
         </div>
@@ -66,11 +66,11 @@ const AdminJobs = () => {
         </div>
 
         {/* Table Container */}
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
+        <div className="premium-card overflow-hidden">
           <AdminJobsTable />
         </div>
       </motion.div>
-    </>
+    </div>
   );
 };
 

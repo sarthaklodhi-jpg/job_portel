@@ -59,7 +59,7 @@ const CompanyCreate = () => {
   };
 
   return (
-    <>
+    <div className="app-bg">
       <Navbar />
 
       <motion.div
@@ -68,7 +68,7 @@ const CompanyCreate = () => {
         transition={{ duration: 0.45, ease: "easeOut" }}
         className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-14"
       >
-        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-8">
+        <div className="premium-card p-8">
           {/* Header */}
           <div className="flex items-start gap-4 mb-8">
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gray-100">
@@ -76,10 +76,10 @@ const CompanyCreate = () => {
             </div>
 
             <div>
-              <h1 className="text-2xl font-semibold text-gray-900">
+              <h1 className="text-2xl font-bold tracking-tight text-slate-950">
                 Create your company
               </h1>
-              <p className="text-sm text-gray-500 mt-1 max-w-md">
+              <p className="mt-1 max-w-md text-sm text-slate-500">
                 Enter company details. You can update them later.
               </p>
             </div>
@@ -132,7 +132,7 @@ const CompanyCreate = () => {
           </div>
         </div>
       </motion.div>
-    </>
+    </div>
   );
 };
 

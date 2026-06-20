@@ -21,7 +21,6 @@ import {
   Building2,
 } from "lucide-react";
 import { useSelector, useDispatch } from "react-redux";
-import useGetAllCompanies from "../../hook/usegetallcompanies.jsx";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import axios from "axios";
@@ -59,7 +58,6 @@ const CompanyAvatar = ({ name, logo }) => {
 /* ---------------- COMPANIES TABLE ---------------- */
 
 const CompaniesTable = () => {
-  useGetAllCompanies();
   const navigate = useNavigate();
   const dispatch = useDispatch();
 

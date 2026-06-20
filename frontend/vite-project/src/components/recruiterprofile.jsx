@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import Navbar from "./shared/navbar";
 import { Avatar, AvatarImage } from "./ui/avatar";
@@ -18,6 +19,7 @@ import { GradientHero, SectionCard, StatCard } from "./shared/dashboard-primitiv
 const RecruiterProfile = () => {
   const { user } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -54,13 +56,18 @@ const RecruiterProfile = () => {
           jobs: jobs.length,
           applicants: jobs.reduce((sum, job) => sum + (job.applications?.length || 0), 0),
         });
-      } catch {
+      } catch (error) {
+        if (error?.response?.status === 401) {
+          dispatch(setUser(null));
+          navigate("/login", { replace: true });
+          return;
+        }
         setStats({ companies: 0, jobs: 0, applicants: 0 });
       }
     };
 
-    if (user?.role === "recruiter") fetchStats();
-  }, [user]);
+    if (user?.role === "recruiter" && user?.isProfileComplete) fetchStats();
+  }, [dispatch, navigate, user]);
 
   const completion = useMemo(() => {
     const fields = [
@@ -119,9 +126,9 @@ const RecruiterProfile = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="app-bg">
       <Navbar />
-      <div className="max-w-5xl mx-auto mt-10 px-4 space-y-6">
+      <div className="mx-auto max-w-5xl space-y-6 px-4 py-10">
         <GradientHero
           title={user?.fullname || "Recruiter"}
           subtitle={user?.profile?.designation || "Recruiter Profile"}
@@ -155,10 +162,10 @@ const RecruiterProfile = () => {
 
         <SectionCard title="Recruiter Details">
           <div className="grid sm:grid-cols-2 gap-4 text-sm">
-            <p className="flex items-center gap-2 text-slate-700"><Mail className="h-4 w-4" />{user?.email || "NA"}</p>
-            <p className="flex items-center gap-2 text-slate-700"><Contact className="h-4 w-4" />{user?.phoneNumber || "NA"}</p>
-            <p className="text-slate-700"><span className="font-semibold">Location:</span> {user?.profile?.location || "Not added"}</p>
-            <p className="text-slate-700"><span className="font-semibold">Experience:</span> {user?.profile?.experience || "Not added"}</p>
+            <p className="flex items-center gap-2 rounded-xl bg-slate-50 p-3 text-slate-700"><Mail className="h-4 w-4 text-sky-600" />{user?.email || "NA"}</p>
+            <p className="flex items-center gap-2 rounded-xl bg-slate-50 p-3 text-slate-700"><Contact className="h-4 w-4 text-teal-600" />{user?.phoneNumber || "NA"}</p>
+            <p className="rounded-xl bg-slate-50 p-3 text-slate-700"><span className="font-semibold">Location:</span> {user?.profile?.location || "Not added"}</p>
+            <p className="rounded-xl bg-slate-50 p-3 text-slate-700"><span className="font-semibold">Experience:</span> {user?.profile?.experience || "Not added"}</p>
           </div>
           <p className="mt-4 text-slate-600">{user?.profile?.bio || "No bio available."}</p>
         </SectionCard>
@@ -191,7 +198,7 @@ const RecruiterProfile = () => {
       </div>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl rounded-2xl">
           <DialogHeader>
             <DialogTitle>Update Recruiter Profile</DialogTitle>
           </DialogHeader>

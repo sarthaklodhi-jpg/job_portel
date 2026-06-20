@@ -1,9 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import Navbar from "../shared/navbar";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { RadioGroup } from "@/components/ui/radio-group";
 import axios from "axios";
 import { USER_API_END_POINT } from "../../utils/constant";
 import { toast } from "sonner";
@@ -17,8 +16,10 @@ import { GoogleLogin } from "@react-oauth/google";
 const Login = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-
-  const { loading, user } = useSelector((store) => store.auth);
+  const { loading } = useSelector((store) => store.auth);
+  const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+  const showGoogleLogin =
+    googleClientId && !["localhost", "127.0.0.1"].includes(window.location.hostname);
 
   const [input, setInput] = useState({
     email: "",
@@ -33,12 +34,6 @@ const Login = () => {
   const getLandingPath = (loggedInUser) =>
     loggedInUser?.role === "recruiter" ? "/admin/companies" : "/jobs";
 
-  useEffect(() => {
-    if (user?.isProfileComplete) {
-      navigate(getLandingPath(user), { replace: true });
-    }
-  }, [user, navigate]);
-
   const submitHandler = async (e) => {
     e.preventDefault();
 
@@ -50,14 +45,10 @@ const Login = () => {
     try {
       dispatch(setLoading(true));
 
-      const res = await axios.post(
-        `${USER_API_END_POINT}/login`,
-        input,
-        {
-          headers: { "Content-Type": "application/json" },
-          withCredentials: true, // 🔴 REQUIRED for cookies
-        }
-      );
+      const res = await axios.post(`${USER_API_END_POINT}/login`, input, {
+        headers: { "Content-Type": "application/json" },
+        withCredentials: true,
+      });
 
       if (res.data.success) {
         dispatch(setUser(res.data.user));
@@ -65,47 +56,34 @@ const Login = () => {
         navigate(getLandingPath(res.data.user));
       }
     } catch (error) {
-      toast.error(
-        error.response?.data?.message || "Login failed"
-      );
+      toast.error(error.response?.data?.message || "Login failed");
     } finally {
       dispatch(setLoading(false));
     }
   };
 
-  /* =========================
-     SAFETY EFFECT
-  ========================= */
-  
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white via-[#f9f6ff] to-white">
+    <div className="app-bg">
       <Navbar />
 
-      {/* Decorative blobs */}
-      <div className="absolute -top-24 -left-24 w-96 h-96 bg-[#F83802]/20 rounded-full blur-3xl" />
-      <div className="absolute top-1/3 -right-24 w-96 h-96 bg-orange-300/20 rounded-full blur-3xl" />
-
-      <div className="relative flex items-center justify-center max-w-7xl mx-auto py-20 px-4">
+      <div className="relative mx-auto flex max-w-7xl items-center justify-center px-4 py-16 sm:px-6 lg:px-8">
         <motion.form
           onSubmit={submitHandler}
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="w-full sm:w-2/3 md:w-1/2 lg:w-[420px]
-                     bg-white border border-gray-200 rounded-2xl
-                     shadow-xl p-8"
+          className="premium-card w-full max-w-[440px] p-8"
         >
-          {/* Header */}
-          <div className="text-center mb-8">
-            <h1 className="font-extrabold text-3xl text-[#F83802]">
-              Welcome Back 👋
+          <div className="mb-8 text-center">
+            <span className="eyebrow mx-auto">Welcome back</span>
+            <h1 className="mt-4 text-3xl font-extrabold tracking-tight text-slate-950">
+              Log in to JobPortal
             </h1>
-            <p className="text-gray-500 mt-2 text-sm">
-              Log in to continue your job search
+            <p className="mt-2 text-sm text-slate-500">
+              Continue your job search or manage your hiring workspace.
             </p>
           </div>
 
-          {/* Email */}
           <div className="mb-5">
             <Label>Email</Label>
             <Input
@@ -117,7 +95,6 @@ const Login = () => {
             />
           </div>
 
-          {/* Password */}
           <div className="mb-5">
             <Label>Password</Label>
             <Input
@@ -125,114 +102,100 @@ const Login = () => {
               name="password"
               value={input.password}
               onChange={changeEventHandler}
-              placeholder="••••••••"
+              placeholder="Enter your password"
             />
           </div>
 
-          {/* Role */}
           <div className="mb-7">
-            <Label className="block mb-2">Continue as</Label>
-
-            <RadioGroup className="grid grid-cols-2 gap-4">
+            <Label className="mb-2 block">Continue as</Label>
+            <div className="grid grid-cols-2 gap-4">
               {["student", "recruiter"].map((role) => (
-                <label
+                <button
+                  type="button"
                   key={role}
-                  className={`flex items-center justify-center p-3 rounded-xl cursor-pointer border
-                    ${
-                      input.role === role
-                        ? "border-[#F83802] bg-[#F83802]/5 text-[#F83802]"
-                        : "border-gray-200 hover:bg-gray-50"
-                    }`}
+                  onClick={() => setInput((prev) => ({ ...prev, role }))}
+                  className={`flex cursor-pointer items-center justify-center rounded-xl border p-3 transition ${
+                    input.role === role
+                      ? "border-sky-300 bg-sky-50 text-sky-700 shadow-sm"
+                      : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+                  }`}
                 >
-                  <Input
-                    type="radio"
-                    name="role"
-                    value={role}
-                    checked={input.role === role}
-                    onChange={changeEventHandler}
-                    className="hidden"
-                  />
-                  <span className="capitalize font-medium">
-                    {role}
-                  </span>
-                </label>
+                  <span className="font-semibold capitalize">{role}</span>
+                </button>
               ))}
-            </RadioGroup>
+            </div>
           </div>
 
-          {/* Submit */}
           {loading ? (
-            <Button className="w-full flex items-center gap-2">
-              <Loader2 className="animate-spin h-4 w-4" />
+            <Button className="w-full" disabled>
+              <Loader2 className="animate-spin" />
               Please wait...
             </Button>
           ) : (
-            <Button
-              type="submit"
-              className="w-full bg-[#F83802] hover:bg-[#d52e00]
-                         text-white font-semibold py-3 rounded-xl"
-            >
+            <Button type="submit" className="w-full">
               Log In
             </Button>
           )}
 
-          <p className="text-center text-sm mt-6 text-gray-600">
-            Don’t have an account?{" "}
-            <a
-              href="/signup"
-              className="text-[#F83802] font-medium hover:underline"
-            >
+          <p className="mt-6 text-center text-sm text-slate-600">
+            Don't have an account?{" "}
+            <a href="/signup" className="font-semibold text-sky-700 hover:underline">
               Sign Up
             </a>
           </p>
-          {/* Divider */}
-<div className="my-6 flex items-center gap-3">
-  <div className="flex-1 h-px bg-gray-200" />
-  <span className="text-sm text-gray-400">OR</span>
-  <div className="flex-1 h-px bg-gray-200" />
-</div>
 
-{/* Google Login */}
-<div className="flex justify-center">
-  <GoogleLogin
-    onSuccess={async (credentialResponse) => {
-     
+          {showGoogleLogin && (
+            <>
+              <div className="my-6 flex items-center gap-3">
+                <div className="h-px flex-1 bg-slate-200" />
+                <span className="text-sm text-slate-400">OR</span>
+                <div className="h-px flex-1 bg-slate-200" />
+              </div>
 
-      try {
-        dispatch(setLoading(true));
-
-        const res = await axios.post(
-          `${USER_API_END_POINT}/google`,
-          {
-            token: credentialResponse.credential,
-           
-          },
-          { withCredentials: true }
-        );
-
-       if (res.data.success) {
-  dispatch(setUser(res.data.user));
-
-  if (!res.data.isProfileComplete) {
-    navigate("/complete-profile");
-  } else {
-    navigate(getLandingPath(res.data.user));
-  }
-}
-
-      } catch {
-        toast.error("Google login failed");
-      } finally {
-        dispatch(setLoading(false));
-      }
-    }}
-    onError={() => toast.error("Google Login Failed")}
-  />
-</div>
-
+              <div className="flex justify-center">
+                <GoogleLoginBlock getLandingPath={getLandingPath} />
+              </div>
+            </>
+          )}
         </motion.form>
       </div>
     </div>
+  );
+};
+
+const GoogleLoginBlock = ({ getLandingPath }) => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  return (
+    <GoogleLogin
+      onSuccess={async (credentialResponse) => {
+        try {
+          dispatch(setLoading(true));
+
+          const res = await axios.post(
+            `${USER_API_END_POINT}/google`,
+            { token: credentialResponse.credential },
+            { withCredentials: true }
+          );
+
+          if (res.data.success) {
+            dispatch(setUser(res.data.user));
+
+            if (!res.data.isProfileComplete) {
+              navigate("/complete-profile");
+            } else {
+              navigate(getLandingPath(res.data.user));
+            }
+          }
+        } catch {
+          toast.error("Google login failed");
+        } finally {
+          dispatch(setLoading(false));
+        }
+      }}
+      onError={() => toast.error("Google Login Failed")}
+    />
   );
 };
 

@@ -7,7 +7,7 @@ import {
   PopoverContent,
 } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
-import { User2, LogOut, ChevronDown, Menu, X } from "lucide-react";
+import { BriefcaseBusiness, User2, LogOut, ChevronDown, Menu, X } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { USER_API_END_POINT } from "../../utils/constant.js";
 import axios from "axios";
@@ -38,20 +38,23 @@ const Navbar = () => {
   };
 
   return (
-    <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-xl border-b border-gray-200">
+    <header className="sticky top-0 z-50 border-b border-slate-200/70 bg-white/85 backdrop-blur-2xl">
       <motion.div
         initial={{ opacity: 0, y: -16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.45, ease: "easeOut" }}
-        className="w-full h-20 flex items-center justify-between px-4 sm:px-6 lg:px-8"
+        className="mx-auto flex h-18 w-full max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8"
       >
-        <Link to="/" className="flex items-center">
-          <span className="text-2xl sm:text-3xl font-extrabold tracking-tight text-gray-900">
-            Job<span className="text-[#F83802]">Portal</span>
+        <Link to="/" className="flex items-center gap-2">
+          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-950 text-white shadow-lg">
+            <BriefcaseBusiness className="h-5 w-5" />
+          </span>
+          <span className="text-xl sm:text-2xl font-extrabold tracking-tight text-slate-950">
+            Job<span className="text-sky-600">Portal</span>
           </span>
         </Link>
 
-        <nav className="hidden md:flex items-center gap-10 text-[15px] font-semibold text-gray-700">
+        <nav className="hidden md:flex items-center gap-8 text-[15px] font-semibold text-slate-600">
           <NavLinks user={user} />
         </nav>
 
@@ -74,19 +77,19 @@ const Navbar = () => {
                   whileHover={{ scale: 1.04 }}
                   className="flex items-center gap-3 rounded-full px-3 py-2 hover:bg-gray-100 transition"
                 >
-                  <Avatar className="h-11 w-11 ring-2 ring-transparent hover:ring-[#F83802]/40 transition">
+                  <Avatar className="h-11 w-11 ring-2 ring-transparent hover:ring-sky-300 transition">
                     <AvatarImage
                       src={user?.profile?.profilePhoto || "https://github.com/shadcn.png"}
                       alt={user?.fullname || "User"}
                     />
                   </Avatar>
-                  <ChevronDown className="h-5 w-5 text-gray-500" />
+                  <ChevronDown className="h-5 w-5 text-slate-500" />
                 </motion.button>
               </PopoverTrigger>
 
               <PopoverContent
                 align="end"
-                className="w-72 rounded-2xl border border-gray-200 shadow-xl p-4"
+                className="w-72 rounded-2xl border border-slate-200 bg-white/95 p-4 shadow-[0_24px_70px_rgba(15,23,42,0.18)] backdrop-blur-xl"
               >
                 <div className="flex items-center gap-3 mb-4">
                   <Avatar className="h-12 w-12">
@@ -96,17 +99,17 @@ const Navbar = () => {
                     />
                   </Avatar>
                   <div className="min-w-0">
-                    <p className="font-semibold text-gray-900 truncate">{user?.fullname}</p>
-                    <p className="text-xs text-gray-500 capitalize">{user?.role}</p>
+                    <p className="font-semibold text-slate-950 truncate">{user?.fullname}</p>
+                    <p className="text-xs text-slate-500 capitalize">{user?.role}</p>
                   </div>
                 </div>
 
-                <div className="border-t border-gray-100 my-3" />
+                <div className="border-t border-slate-100 my-3" />
 
                 <div className="flex flex-col gap-1 text-sm">
                   <Link
                     to={user.role === "recruiter" ? "/recruiter/profile" : "/profile"}
-                    className="flex items-center gap-2 rounded-lg px-3 py-2 hover:bg-gray-100 transition"
+                    className="flex items-center gap-2 rounded-lg px-3 py-2 text-slate-700 hover:bg-slate-100 transition"
                   >
                     <User2 className="h-4 w-4" />
                     View Profile
@@ -114,7 +117,7 @@ const Navbar = () => {
 
                   <button
                     onClick={logouthandler}
-                    className="flex items-center gap-2 rounded-lg px-3 py-2 hover:bg-gray-100 transition"
+                    className="flex items-center gap-2 rounded-lg px-3 py-2 text-slate-700 hover:bg-slate-100 transition"
                   >
                     <LogOut className="h-4 w-4" />
                     Logout
@@ -127,7 +130,7 @@ const Navbar = () => {
 
         <button
           type="button"
-          className="md:hidden inline-flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200"
+          className="md:hidden inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white shadow-sm"
           onClick={() => setMobileOpen((open) => !open)}
           aria-label="Toggle navigation"
         >
@@ -136,8 +139,8 @@ const Navbar = () => {
       </motion.div>
 
       {mobileOpen && (
-        <div className="md:hidden border-t border-gray-200 bg-white px-4 py-4">
-          <nav className="flex flex-col gap-3 text-sm font-semibold text-gray-700">
+        <div className="md:hidden border-t border-slate-200 bg-white px-4 py-4 shadow-xl">
+          <nav className="flex flex-col gap-3 text-sm font-semibold text-slate-700">
             <NavLinks user={user} onNavigate={() => setMobileOpen(false)} />
           </nav>
 
@@ -156,8 +159,8 @@ const Navbar = () => {
             ) : (
               <div className="flex items-center justify-between gap-3">
                 <div className="min-w-0">
-                  <p className="truncate font-semibold text-gray-900">{user.fullname}</p>
-                  <p className="text-xs text-gray-500 capitalize">{user.role}</p>
+                  <p className="truncate font-semibold text-slate-950">{user.fullname}</p>
+                  <p className="text-xs text-slate-500 capitalize">{user.role}</p>
                 </div>
                 <Button variant="outline" onClick={logouthandler}>
                   <LogOut className="h-4 w-4 mr-2" />
@@ -192,10 +195,10 @@ const NavItem = ({ to, children, onNavigate }) => (
   <Link
     to={to}
     onClick={onNavigate}
-    className="relative group transition-colors hover:text-[#F83802]"
+    className="relative group transition-colors hover:text-sky-600"
   >
     {children}
-    <span className="absolute left-0 -bottom-1 h-[2px] w-0 bg-[#F83802] transition-all group-hover:w-full" />
+    <span className="absolute left-0 -bottom-1 h-[2px] w-0 rounded-full bg-sky-500 transition-all group-hover:w-full" />
   </Link>
 );
 
