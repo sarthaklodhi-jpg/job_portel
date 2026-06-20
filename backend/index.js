@@ -18,8 +18,8 @@ const allowedOrigins = [
   "http://localhost:5173",
   "http://localhost:5174",
   "https://job-portel-sage.vercel.app",
+  "https://job-portel-r6zd.vercel.app",
 ];
-
 const isAllowedLocalhostOrigin = (origin) =>
   /^http:\/\/localhost:51\d{2}$/.test(origin || "") ||
   /^http:\/\/127\.0\.0\.1:51\d{2}$/.test(origin || "");
